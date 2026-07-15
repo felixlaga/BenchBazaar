@@ -1,0 +1,16 @@
+{
+  "short_name": "BenchBazaar",
+  "name": "BenchBazaar · Odd tests. Useful signals.",
+  "icons": [
+    {
+      "src": "/brand-mark.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#fff8e7",
+  "background_color": "#fff8e7"
+}
