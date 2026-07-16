@@ -55,6 +55,9 @@ export function SiteHeader() {
             <ShoppingBasket aria-hidden="true" size={20} />
           </Link>
           <DesktopAuthAction />
+          <Link className="nav-link desktop-only" to="/receipts/new">
+            Submit result
+          </Link>
           <Link className="button button--ink desktop-only" to="/publish">
             <Store aria-hidden="true" size={17} />
             Publish
@@ -80,6 +83,9 @@ export function SiteHeader() {
               </Link>
               <Link className="mobile-menu__link" to="/publish">
                 Publish a benchmark
+              </Link>
+              <Link className="mobile-menu__link" to="/receipts/new">
+                Submit a result
               </Link>
               <MobileAuthAction />
             </nav>

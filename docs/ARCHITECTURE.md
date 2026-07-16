@@ -20,6 +20,7 @@ src/
       domain/           Framework-independent domain types
       server/           Catalog repository boundary and focused tests
     publishing/         Profile, owner-workspace, and draft-editor components
+    receipts/           Manual submission, receipt actions, and owner receipt book
   lib/                  Cross-cutting helpers and security utilities
   routes/               Thin TanStack Start route modules
 convex/
@@ -27,6 +28,7 @@ convex/
   catalog.ts            Purpose-built public catalog queries
   drafts.ts             Owner-only draft, autosave, successor, and publish mutations
   basket.ts             Identity-derived basket queries and mutations
+  receipts.ts           Model resolution, manual ingestion, evidence, and status actions
   users.ts              Protected current-user query and identity synchronization
   seed.ts               Internal-only synthetic development seed loader
   schema.ts             Public MVP schema subset; no sealed-content fields
@@ -63,6 +65,15 @@ updates the stable benchmark pointer, and records a private audit event. Correct
 from a successor draft; published version content is never edited in place. Basket saves
 use the same identity-derived authorization boundary and never accept a browser-supplied
 owner ID.
+
+Manual receipt submission accepts aggregate claims and deliberately public HTTPS evidence
+only. Convex resolves or creates a normalized canonical model record while retaining the
+exact submitted model string, assigns the evidence level, validates compatibility against
+the immutable version and track, and updates counters atomically. Compatibility failures
+remain public but cannot rank. Corrections create a successor receipt and only transition
+the old record to `superseded`; official designation and disputes use separate authorized
+mutations and audit events. An internal reconciliation mutation repairs denormalized
+receipt counters from source records.
 
 ## Protected-data rule
 

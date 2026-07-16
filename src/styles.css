@@ -3353,6 +3353,199 @@ button.mobile-menu__link {
   margin: 4px 0 8px;
 }
 
+/* Manual receipts */
+.receipt-submit-page {
+  padding-bottom: 120px;
+}
+
+.receipt-form {
+  display: grid;
+  gap: 28px;
+}
+
+.receipt-form__section {
+  padding: clamp(22px, 4vw, 38px);
+  background: var(--paper-raised);
+  border: 1.5px solid var(--ink);
+  border-radius: 13px;
+  box-shadow: var(--shadow-sm);
+}
+
+.receipt-form__section-heading {
+  display: flex;
+  gap: 15px;
+  align-items: flex-start;
+  padding-bottom: 18px;
+  margin-bottom: 24px;
+  border-bottom: 1px dashed var(--line);
+}
+
+.receipt-form__section-heading > span {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  flex: 0 0 auto;
+  place-items: center;
+  color: var(--paper);
+  font-family: var(--font-mono);
+  font-weight: 800;
+  background: var(--tomato);
+  border: 1.5px solid var(--ink);
+  border-radius: 50%;
+}
+
+.receipt-form__section-heading h2,
+.receipt-form__section-heading p {
+  margin: 0 0 4px;
+}
+
+.receipt-form__section-heading p {
+  color: var(--ink-muted);
+  font-size: 0.82rem;
+}
+
+.receipt-metrics-editor {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.receipt-metric-row,
+.artifact-editor {
+  display: grid;
+  grid-template-columns: 1fr 1.4fr 0.7fr 0.6fr auto;
+  gap: 10px;
+  align-items: end;
+  padding: 15px;
+  background: var(--paper-muted);
+  border: 1px solid var(--line);
+  border-radius: 9px;
+}
+
+.artifact-editor {
+  grid-template-columns: 1fr 2fr 1fr auto;
+  margin-bottom: 12px;
+}
+
+.receipt-metric-row label,
+.artifact-editor label,
+.receipt-notes,
+.receipt-dispute-form label {
+  display: grid;
+  gap: 7px;
+  color: var(--ink-muted);
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.receipt-metric-row input,
+.artifact-editor input,
+.receipt-notes textarea,
+.receipt-dispute-form textarea {
+  width: 100%;
+  min-height: 42px;
+  padding: 9px 11px;
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 0.88rem;
+  background: var(--paper);
+  border: 1.5px solid var(--ink);
+  border-radius: 7px;
+}
+
+.receipt-notes {
+  margin-top: 22px;
+}
+
+.receipt-notes textarea,
+.receipt-dispute-form textarea {
+  min-height: 96px;
+  resize: vertical;
+}
+
+.receipt-confirmation {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 20px;
+  padding: clamp(22px, 4vw, 34px);
+  color: var(--ink);
+  background: var(--mustard-light);
+  border: 2px solid var(--ink);
+  border-radius: 13px;
+}
+
+.receipt-confirmation h2 {
+  margin: 4px 0 16px;
+}
+
+.receipt-confirmation .confirmation-check + .confirmation-check {
+  margin-top: 11px;
+}
+
+.receipt-form__submit {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px;
+  background: var(--paper-deep);
+  border: 1.5px solid var(--ink);
+  border-radius: 11px;
+}
+
+.receipt-form__submit > div {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  max-width: 680px;
+}
+
+.receipt-form__submit p {
+  margin: 0;
+  color: var(--ink-muted);
+  font-size: 0.8rem;
+}
+
+.receipt-actions {
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(300px, 1.2fr);
+  gap: 36px;
+  padding: 28px;
+  margin-top: 46px;
+  background: var(--paper-deep);
+  border: 2px solid var(--ink);
+  border-radius: 12px;
+}
+
+.receipt-actions h2 {
+  margin: 4px 0 8px;
+}
+
+.receipt-actions__controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.receipt-dispute-form {
+  display: grid;
+  flex: 1 0 100%;
+  gap: 10px;
+}
+
+.receipt-workspace {
+  padding: clamp(22px, 4vw, 40px);
+  margin-top: 40px;
+  background: var(--paper-raised);
+  border: 2px solid var(--ink);
+  border-radius: 14px;
+  box-shadow: var(--shadow-md);
+}
+
 @media (max-width: 900px) {
   .draft-editor__layout {
     grid-template-columns: 1fr;
@@ -3361,6 +3554,12 @@ button.mobile-menu__link {
   .draft-live-preview {
     position: static;
     grid-row: 1;
+  }
+
+  .receipt-metric-row,
+  .artifact-editor,
+  .receipt-actions {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -3378,10 +3577,15 @@ button.mobile-menu__link {
 
   .owner-workspace__heading,
   .draft-editor__header,
+  .receipt-form__submit,
   .workspace-list article,
   .basket-list article {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .receipt-confirmation {
+    grid-template-columns: 1fr;
   }
 
   .account-links {

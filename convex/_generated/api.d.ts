@@ -12,6 +12,9 @@ import type * as basket from "../basket.js";
 import type * as catalog from "../catalog.js";
 import type * as drafts from "../drafts.js";
 import type * as lib_authorization from "../lib/authorization.js";
+import type * as lib_receipt_compatibility from "../lib/receipt_compatibility.js";
+import type * as lib_receipt_counters from "../lib/receipt_counters.js";
+import type * as receipts from "../receipts.js";
 import type * as seed from "../seed.js";
 import type * as users from "../users.js";
 
@@ -26,6 +29,9 @@ declare const fullApi: ApiFromModules<{
   catalog: typeof catalog;
   drafts: typeof drafts;
   "lib/authorization": typeof lib_authorization;
+  "lib/receipt_compatibility": typeof lib_receipt_compatibility;
+  "lib/receipt_counters": typeof lib_receipt_counters;
+  receipts: typeof receipts;
   seed: typeof seed;
   users: typeof users;
 }>;

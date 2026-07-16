@@ -18,6 +18,7 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as StallsHandleRouteImport } from './routes/stalls.$handle'
 import { Route as SettingsProfileRouteImport } from './routes/settings.profile'
+import { Route as ReceiptsNewRouteImport } from './routes/receipts.new'
 import { Route as ReceiptsReceiptIdRouteImport } from './routes/receipts.$receiptId'
 import { Route as ModelsModelSlugRouteImport } from './routes/models.$modelSlug'
 import { Route as DraftsDraftIdRouteImport } from './routes/drafts.$draftId'
@@ -74,6 +75,11 @@ const StallsHandleRoute = StallsHandleRouteImport.update({
 const SettingsProfileRoute = SettingsProfileRouteImport.update({
   id: '/settings/profile',
   path: '/settings/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReceiptsNewRoute = ReceiptsNewRouteImport.update({
+  id: '/receipts/new',
+  path: '/receipts/new',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ReceiptsReceiptIdRoute = ReceiptsReceiptIdRouteImport.update({
@@ -151,6 +157,7 @@ export interface FileRoutesByFullPath {
   '/drafts/$draftId': typeof DraftsDraftIdRoute
   '/models/$modelSlug': typeof ModelsModelSlugRoute
   '/receipts/$receiptId': typeof ReceiptsReceiptIdRoute
+  '/receipts/new': typeof ReceiptsNewRoute
   '/settings/profile': typeof SettingsProfileRoute
   '/stalls/$handle': typeof StallsHandleRoute
   '/api/auth/callback': typeof ApiAuthCallbackRoute
@@ -174,6 +181,7 @@ export interface FileRoutesByTo {
   '/drafts/$draftId': typeof DraftsDraftIdRoute
   '/models/$modelSlug': typeof ModelsModelSlugRoute
   '/receipts/$receiptId': typeof ReceiptsReceiptIdRoute
+  '/receipts/new': typeof ReceiptsNewRoute
   '/settings/profile': typeof SettingsProfileRoute
   '/stalls/$handle': typeof StallsHandleRoute
   '/api/auth/callback': typeof ApiAuthCallbackRoute
@@ -198,6 +206,7 @@ export interface FileRoutesById {
   '/drafts/$draftId': typeof DraftsDraftIdRoute
   '/models/$modelSlug': typeof ModelsModelSlugRoute
   '/receipts/$receiptId': typeof ReceiptsReceiptIdRoute
+  '/receipts/new': typeof ReceiptsNewRoute
   '/settings/profile': typeof SettingsProfileRoute
   '/stalls/$handle': typeof StallsHandleRoute
   '/api/auth/callback': typeof ApiAuthCallbackRoute
@@ -223,6 +232,7 @@ export interface FileRouteTypes {
     | '/drafts/$draftId'
     | '/models/$modelSlug'
     | '/receipts/$receiptId'
+    | '/receipts/new'
     | '/settings/profile'
     | '/stalls/$handle'
     | '/api/auth/callback'
@@ -246,6 +256,7 @@ export interface FileRouteTypes {
     | '/drafts/$draftId'
     | '/models/$modelSlug'
     | '/receipts/$receiptId'
+    | '/receipts/new'
     | '/settings/profile'
     | '/stalls/$handle'
     | '/api/auth/callback'
@@ -269,6 +280,7 @@ export interface FileRouteTypes {
     | '/drafts/$draftId'
     | '/models/$modelSlug'
     | '/receipts/$receiptId'
+    | '/receipts/new'
     | '/settings/profile'
     | '/stalls/$handle'
     | '/api/auth/callback'
@@ -293,6 +305,7 @@ export interface RootRouteChildren {
   DraftsDraftIdRoute: typeof DraftsDraftIdRoute
   ModelsModelSlugRoute: typeof ModelsModelSlugRoute
   ReceiptsReceiptIdRoute: typeof ReceiptsReceiptIdRoute
+  ReceiptsNewRoute: typeof ReceiptsNewRoute
   SettingsProfileRoute: typeof SettingsProfileRoute
   StallsHandleRoute: typeof StallsHandleRoute
   ApiAuthCallbackRoute: typeof ApiAuthCallbackRoute
@@ -365,6 +378,13 @@ declare module '@tanstack/react-router' {
       path: '/settings/profile'
       fullPath: '/settings/profile'
       preLoaderRoute: typeof SettingsProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/receipts/new': {
+      id: '/receipts/new'
+      path: '/receipts/new'
+      fullPath: '/receipts/new'
+      preLoaderRoute: typeof ReceiptsNewRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/receipts/$receiptId': {
@@ -479,6 +499,7 @@ const rootRouteChildren: RootRouteChildren = {
   DraftsDraftIdRoute: DraftsDraftIdRoute,
   ModelsModelSlugRoute: ModelsModelSlugRoute,
   ReceiptsReceiptIdRoute: ReceiptsReceiptIdRoute,
+  ReceiptsNewRoute: ReceiptsNewRoute,
   SettingsProfileRoute: SettingsProfileRoute,
   StallsHandleRoute: StallsHandleRoute,
   ApiAuthCallbackRoute: ApiAuthCallbackRoute,

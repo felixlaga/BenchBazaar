@@ -12,6 +12,7 @@
     "convex:dev": "convex dev",
     "convex:codegen": "convex codegen",
     "convex:seed": "convex run internal.seed.loadSyntheticCatalog '{\"confirmSynthetic\":true}'",
+    "convex:reconcile": "convex run internal.receipts.reconcileCounters '{\"confirm\":true}'",
     "build": "vite build",
     "preview": "vite preview",
     "test": "vitest run",

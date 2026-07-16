@@ -454,6 +454,8 @@ export const loadSyntheticCatalog = internalMutation({
         ],
         itemCount: fixture.itemCount,
         scorerVersion: '1.0.0',
+        configurationSummary:
+          'Synthetic preview configuration used only to demonstrate the public receipt format.',
         configurationDigest: fixture.configurationDigest,
         datasetDigest: fixture.datasetDigest,
         manifestDigest: manifestDigestFor(
@@ -481,10 +483,17 @@ export const loadSyntheticCatalog = internalMutation({
           : {}),
         ...(status === 'invalid'
           ? {
+              compatibilityStatus: 'incompatible' as const,
+              compatibilityIssues: [
+                'synthetic example: submitted track configuration did not match',
+              ],
               moderationReason:
                 'Synthetic example: the submitted result did not match the declared track configuration.',
             }
-          : {}),
+          : {
+              compatibilityStatus: 'compatible' as const,
+              compatibilityIssues: [],
+            }),
         ...(verification.signatureValid
           ? {
               signatureFingerprint: `ed25519:synthetic:${String(receiptIndex + 1).padStart(4, '0')}`,

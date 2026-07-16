@@ -20,6 +20,7 @@ import type { BenchmarkPageData } from '../domain/catalog'
 import { FreeSampleCard } from './free-sample-card'
 import { MarketCard } from './market-card'
 import { Scoreboard } from './scoreboard'
+import { ReceiptPreview } from './receipt-preview'
 
 type BenchmarkPageProps = {
   data: BenchmarkPageData
@@ -101,6 +102,17 @@ export function BenchmarkPage({
                   </Link>
                 )}
                 <BasketButton slug={benchmark.slug} />
+                <Link
+                  className="button button--paper"
+                  search={{
+                    slug: benchmark.slug,
+                    version: benchmark.version,
+                    track: track.id,
+                  }}
+                  to="/receipts/new"
+                >
+                  <ReceiptText aria-hidden="true" size={17} /> Submit result
+                </Link>
               </div>
             </div>
             <aside className="listing-ticket">
@@ -122,6 +134,7 @@ export function BenchmarkPage({
         <nav aria-label="On this page" className="anchor-nav">
           <a href="#samples">Free samples</a>
           <a href="#scoreboard">Scoreboard</a>
+          <a href="#receipts">All receipts</a>
           <a href="#method">Method</a>
           <a href="#limitations">Limitations</a>
           <a href="#versions">Versions</a>
@@ -165,6 +178,38 @@ export function BenchmarkPage({
               />
             ))}
           </div>
+        </section>
+
+        <section className="content-section" id="receipts">
+          <SectionHeading
+            action={
+              <Link
+                search={{
+                  slug: benchmark.slug,
+                  version: benchmark.version,
+                  track: track.id,
+                }}
+                to="/receipts/new"
+              >
+                Submit a result
+              </Link>
+            }
+            description="Every receipt for this exact version remains inspectable, including incompatible, disputed, invalid, and superseded records."
+            eyebrow={`Version ${benchmark.version} · complete history`}
+            title="All receipts"
+          />
+          {data.receipts.length ? (
+            <div className="receipt-grid">
+              {data.receipts.map((receipt) => (
+                <ReceiptPreview key={receipt.id} receipt={receipt} />
+              ))}
+            </div>
+          ) : (
+            <div className="empty-state">
+              <strong>No receipts for this exact version.</strong>
+              <p>Submit an aggregate manual result to begin the history.</p>
+            </div>
+          )}
         </section>
 
         <section className="content-section" id="scoreboard">

@@ -6,6 +6,7 @@ import { ArrowLeft, BadgeCheck, CircleAlert, ExternalLink } from 'lucide-react'
 import { CopyButton } from '#/components/ui/copy-button'
 import { StatusBanner } from '#/components/ui/status-banner'
 import { ReceiptPaper } from '#/features/catalog/components/receipt-paper'
+import { ReceiptActions } from '#/features/receipts/components/receipt-actions'
 
 import { api } from '../../convex/_generated/api'
 
@@ -68,10 +69,12 @@ function ReceiptPage() {
         </p>
       </header>
 
-      <StatusBanner title="Synthetic preview receipt">
-        This record demonstrates the receipt format. It is not a real
-        performance claim and was not produced by a live model evaluation.
-      </StatusBanner>
+      {receipt.synthetic && (
+        <StatusBanner title="Synthetic preview receipt">
+          This record demonstrates the receipt format. It is not a real
+          performance claim and was not produced by a live model evaluation.
+        </StatusBanner>
+      )}
 
       {receipt.state.status !== 'valid' && (
         <StatusBanner variant="warning" title={receipt.state.label}>
@@ -144,6 +147,22 @@ function ReceiptPage() {
               Manifest <code>{receipt.manifestDigest}</code>
             </li>
           </ul>
+          {receipt.modelIdentityWarning && (
+            <StatusBanner variant="warning" title="Model identity warning">
+              {receipt.modelIdentityWarning}
+            </StatusBanner>
+          )}
+          <h3>Public run configuration</h3>
+          <p>{receipt.configurationSummary}</p>
+          <ul>
+            <li>Completed {receipt.completedAt}</li>
+            <li>
+              Endpoint exposure: {receipt.endpointExposure.replaceAll('_', ' ')}
+            </li>
+            <li>
+              Submitted model ID <code>{receipt.submittedModelId}</code>
+            </li>
+          </ul>
           {receipt.signatureFingerprint && (
             <>
               <h3>Signature fingerprint</h3>
@@ -165,8 +184,16 @@ function ReceiptPage() {
               </ul>
             </>
           )}
+          {receipt.notes && (
+            <>
+              <h3>Submitter notes</h3>
+              <p>{receipt.notes}</p>
+            </>
+          )}
         </aside>
       </div>
+
+      <ReceiptActions receiptId={receipt.id} />
 
       <section className="receipt-share" aria-labelledby="receipt-share-title">
         <div>

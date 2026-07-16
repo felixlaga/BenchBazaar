@@ -4,6 +4,7 @@ import { Github } from 'lucide-react'
 
 import { StatusBanner } from '#/components/ui/status-banner'
 import { OwnerWorkspace } from '#/features/publishing/components/owner-workspace'
+import { ReceiptWorkspace } from '#/features/receipts/components/receipt-workspace'
 
 export const Route = createFileRoute('/dashboard')({
   head: () => ({
@@ -41,6 +42,7 @@ function DashboardPage() {
       </Unauthenticated>
       <Authenticated>
         <OwnerWorkspace />
+        <ReceiptWorkspace />
       </Authenticated>
     </div>
   )

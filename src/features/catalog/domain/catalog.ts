@@ -120,6 +120,7 @@ export type Receipt = {
     exactId: string
     provider: string
   }
+  submittedModelId: string
   primaryMetric: {
     label: string
     value: number
@@ -127,8 +128,10 @@ export type Receipt = {
   }
   metrics: Array<{ label: string; value: string }>
   submittedAt: string
+  completedAt: string
   itemCount: number
   scorerVersion: string
+  configurationSummary: string
   configurationDigest: string
   datasetDigest: string
   verification: {
@@ -147,8 +150,16 @@ export type Receipt = {
     explanation: string
   }
   manifestDigest: string
+  endpointExposure:
+    | 'trusted_local_model'
+    | 'operator_provider_account'
+    | 'site_provider_account'
+    | 'requester_endpoint'
+    | 'unknown_or_legacy'
   signatureFingerprint?: string
   artifacts: Array<{ label: string; url: string; digest?: string }>
+  notes?: string
+  modelIdentityWarning?: string
   supersedes?: string
   supersededBy?: string
   synthetic: boolean
@@ -162,6 +173,7 @@ export type Scoreboard = {
 export type BenchmarkPageData = {
   benchmark: BenchmarkDetail
   scoreboards: Array<Scoreboard>
+  receipts: Array<Receipt>
   relatedBenchmarks: Array<BenchmarkSummary>
 }
 

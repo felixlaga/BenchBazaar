@@ -320,6 +320,7 @@ export default defineSchema({
     metrics: v.array(metric),
     itemCount: v.number(),
     scorerVersion: v.string(),
+    configurationSummary: v.optional(v.string()),
     configurationDigest: v.string(),
     datasetDigest: v.optional(v.string()),
     generatorDigest: v.optional(v.string()),
@@ -343,6 +344,10 @@ export default defineSchema({
       ),
     ),
     notesMarkdown: v.optional(v.string()),
+    compatibilityStatus: v.optional(
+      v.union(v.literal('compatible'), v.literal('incompatible')),
+    ),
+    compatibilityIssues: v.optional(v.array(v.string())),
     supersedesReceiptId: v.optional(v.id('receipts')),
     disputeSummary: v.optional(v.string()),
     moderationReason: v.optional(v.string()),
@@ -358,12 +363,30 @@ export default defineSchema({
       'modelId',
     ])
     .index('by_modelId_completedAt', ['modelId', 'completedAt'])
+    .index('by_benchmarkId', ['benchmarkId'])
     .index('by_supersedesReceiptId', ['supersedesReceiptId'])
     .index('by_status_submittedAt', ['status', 'submittedAt'])
     .index('by_submittedByUserId_submittedAt', [
       'submittedByUserId',
       'submittedAt',
     ]),
+
+  receiptDisputes: defineTable({
+    receiptId: v.id('receipts'),
+    openedByUserId: v.id('users'),
+    reason: v.string(),
+    status: v.union(
+      v.literal('open'),
+      v.literal('resolved'),
+      v.literal('rejected'),
+    ),
+    createdAt: v.number(),
+    resolvedAt: v.optional(v.number()),
+    resolvedByUserId: v.optional(v.id('users')),
+  })
+    .index('by_receiptId_createdAt', ['receiptId', 'createdAt'])
+    .index('by_openedByUserId_createdAt', ['openedByUserId', 'createdAt'])
+    .index('by_status_createdAt', ['status', 'createdAt']),
 
   basketSaves: defineTable({
     userId: v.id('users'),

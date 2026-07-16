@@ -659,6 +659,7 @@ export const receipts: Array<Receipt> = Array.from(
         exactId: model[2],
         provider: 'Synthetic Preview',
       },
+      submittedModelId: model[2],
       primaryMetric: { label: 'Score', value: score, unit: '%' },
       metrics: [
         { label: 'Primary score', value: `${score}%` },
@@ -668,8 +669,13 @@ export const receipts: Array<Receipt> = Array.from(
       submittedAt: new Date(
         Date.parse('2026-07-14T16:00:00.000Z') - index * 21_600_000,
       ).toISOString(),
+      completedAt: new Date(
+        Date.parse('2026-07-14T16:00:00.000Z') - index * 21_600_000,
+      ).toISOString(),
       itemCount: benchmark.sealedItemCount,
       scorerVersion: '1.0.0',
+      configurationSummary:
+        'Synthetic preview configuration used only to demonstrate the public receipt format.',
       configurationDigest: `sha256:config${String(index + 1).padStart(4, '0')}cafe`,
       datasetDigest: `sha256:dataset${String((index % benchmarks.length) + 1).padStart(4, '0')}beef`,
       verification: {
@@ -688,6 +694,7 @@ export const receipts: Array<Receipt> = Array.from(
           'The version, track, metric, scorer, manifest, and disclosed dataset digest agree.',
       },
       manifestDigest: `sha256:synthetic-${benchmark.slug}-1.0.0-manifest`,
+      endpointExposure: 'operator_provider_account',
       artifacts: [],
       synthetic: true,
     }

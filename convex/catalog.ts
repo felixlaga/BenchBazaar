@@ -20,6 +20,7 @@ import { aisles } from '../src/features/catalog/domain/aisles'
 import type { Doc } from './_generated/dataModel'
 import type { QueryCtx } from './_generated/server'
 import { query as defineQuery } from './_generated/server'
+import { getReceiptCompatibilityIssues } from './lib/receipt_compatibility'
 
 const PAGE_SIZE = 6
 const MAX_SECTION_RESULTS = 100
@@ -219,25 +220,19 @@ async function toReceipt(
     (metric) => metric.key === receipt.primaryMetricKey,
   )
   const verificationStatus = getVerificationStatus(receipt)
-  const track = version.tracks.find(
-    (candidate) => candidate.id === receipt.trackId,
-  )
-  const compatibilityIssues = [
-    ...(track ? [] : ['track is not declared by this exact version']),
-    ...(track && track.primaryMetricKey !== receipt.primaryMetricKey
-      ? ['primary metric does not match the track']
-      : []),
-    ...(track && track.scorerVersion !== receipt.scorerVersion
-      ? ['scorer version does not match the track']
-      : []),
-    ...(version.manifestDigest !== receipt.manifestDigest
-      ? ['manifest digest does not match the exact version']
-      : []),
-    ...(version.sealedPolicy.datasetDigest &&
-    version.sealedPolicy.datasetDigest !== receipt.datasetDigest
-      ? ['dataset digest does not match the exact version']
-      : []),
-  ]
+  const compatibilityIssues = receipt.compatibilityStatus
+    ? (receipt.compatibilityIssues ?? [])
+    : getReceiptCompatibilityIssues({
+        version,
+        model,
+        trackId: receipt.trackId,
+        primaryMetricKey: receipt.primaryMetricKey,
+        scorerVersion: receipt.scorerVersion,
+        manifestDigest: receipt.manifestDigest,
+        datasetDigest: receipt.datasetDigest,
+        generatorDigest: receipt.generatorDigest,
+        itemCount: receipt.itemCount,
+      })
   const reason = receipt.disputeSummary ?? receipt.moderationReason
 
   return {
@@ -254,6 +249,7 @@ async function toReceipt(
       exactId: model.canonicalId,
       provider: model.provider,
     },
+    submittedModelId: receipt.submittedModelId,
     primaryMetric: {
       label: primaryMetric?.label ?? receipt.primaryMetricKey,
       value: receipt.primaryMetricValue,
@@ -264,11 +260,16 @@ async function toReceipt(
       value: `${metric.value}${metric.unit ?? ''}`,
     })),
     submittedAt: new Date(receipt.submittedAt).toISOString(),
+    completedAt: new Date(receipt.completedAt).toISOString(),
     itemCount: receipt.itemCount,
     scorerVersion: receipt.scorerVersion,
+    configurationSummary:
+      receipt.configurationSummary ??
+      'No public configuration summary was provided for this legacy receipt.',
     configurationDigest: receipt.configurationDigest,
     datasetDigest: receipt.datasetDigest ?? 'not disclosed',
     manifestDigest: receipt.manifestDigest,
+    endpointExposure: receipt.endpointExposure,
     verification: {
       status: verificationStatus,
       ...verificationCopy[verificationStatus],
@@ -293,6 +294,17 @@ async function toReceipt(
       url: artifact.url,
       ...(artifact.digest ? { digest: artifact.digest } : {}),
     })),
+    ...(receipt.notesMarkdown ? { notes: receipt.notesMarkdown } : {}),
+    ...(model.status === 'disputed_identity'
+      ? {
+          modelIdentityWarning:
+            'This model identity is ambiguous or disputed and is excluded from exact comparisons.',
+        }
+      : receipt.submittedModelId !== model.canonicalId
+        ? {
+            modelIdentityWarning: `The submitted identifier “${receipt.submittedModelId}” resolves to canonical ID “${model.canonicalId}”.`,
+          }
+        : {}),
     synthetic: receipt.synthetic,
   }
 }
@@ -460,6 +472,9 @@ async function benchmarkPageData(
     ],
   )
   const receiptDocuments = receiptsByTrack.flat()
+  const publicReceipts = await Promise.all(
+    receiptDocuments.map((receipt) => toReceipt(ctx, receipt)),
+  )
   const benchmarkDetail = await toBenchmarkDetail(
     ctx,
     benchmark,
@@ -469,11 +484,8 @@ async function benchmarkPageData(
   )
   const scoreboards: Array<Scoreboard> = await Promise.all(
     benchmarkDetail.tracks.map(async (track) => {
-      const documents = receiptDocuments.filter(
+      const receipts = publicReceipts.filter(
         (receipt) => receipt.trackId === track.id,
-      )
-      const receipts = await Promise.all(
-        documents.map((receipt) => toReceipt(ctx, receipt)),
       )
       return {
         track,
@@ -488,6 +500,10 @@ async function benchmarkPageData(
   return {
     benchmark: benchmarkDetail,
     scoreboards,
+    receipts: publicReceipts.sort(
+      (left, right) =>
+        Date.parse(right.submittedAt) - Date.parse(left.submittedAt),
+    ),
     relatedBenchmarks: await Promise.all(
       relatedDocuments
         .filter((candidate) => candidate._id !== benchmark._id)

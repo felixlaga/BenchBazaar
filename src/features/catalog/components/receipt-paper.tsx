@@ -50,8 +50,8 @@ export function ReceiptPaper({ receipt }: { receipt: Receipt }) {
           </dd>
         </div>
         <div>
-          <dt>Run date</dt>
-          <dd>{formatDate(receipt.submittedAt)}</dd>
+          <dt>Run completed</dt>
+          <dd>{formatDate(receipt.completedAt)}</dd>
         </div>
         <div>
           <dt>Scorer version</dt>

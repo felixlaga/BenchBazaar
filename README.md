@@ -31,12 +31,15 @@ synthetic catalog.
   transaction
 - Successor-version drafts, authenticated basket saves, centralized ownership checks,
   and private publish audit events
+- Canonical model resolution, manual and artifact-linked receipt submission, persisted
+  compatibility validation, complete exact-version receipt history, and scoped ranking
+- Append-only receipt supersession, maintainer-official designation, public disputes,
+  private audit events, and an internal counter-reconciliation command
 - Unit, Convex authorization/data-boundary, security-boundary, and component tests
 
-The real receipt-submission and signed-runner workflows are not presented as complete.
-Managed WorkOS is configured for the linked development deployment, but browser GitHub
-login and the full publish journey still need an end-to-end provider check. CI remains to
-be added.
+The signed-runner workflow is not presented as complete. Managed WorkOS is configured for
+the linked development deployment, but browser GitHub login and the full publish/receipt
+journeys still need an end-to-end provider check. CI remains to be added.
 
 ## Local development
 
@@ -82,6 +85,13 @@ pnpm convex:seed
 The seed mutation is internal-only, requires an explicit synthetic-data confirmation, and
 is safe to rerun. TanStack Start routes render through Convex queries; the fixture module is
 only an input to tests and the development seed loader.
+
+If denormalized receipt counters ever drift during development, repair them with the
+internal-only reconciliation mutation:
+
+```bash
+pnpm convex:reconcile
+```
 
 ### WorkOS AuthKit
 
