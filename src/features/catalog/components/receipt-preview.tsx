@@ -22,7 +22,7 @@ export function ReceiptPreview({ receipt }: { receipt: Receipt }) {
       </div>
       <div className="receipt-preview__status">
         <BadgeCheck aria-hidden="true" size={16} />
-        {receipt.verification.label}
+        {receipt.verification.label} · {receipt.state.label}
       </div>
       <Link params={{ receiptId: receipt.id }} to="/receipts/$receiptId">
         Inspect receipt <ArrowRight aria-hidden="true" size={15} />

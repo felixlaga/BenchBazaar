@@ -2,14 +2,9 @@ import { createFileRoute } from '@tanstack/react-router'
 import { getSignInUrl } from '@workos/authkit-tanstack-react-start'
 
 import { getSafeReturnPath } from '#/lib/auth/return-path'
+import { readWorkOSEnvironment } from '#/lib/env/server'
 
-const hasWorkOSConfig = () =>
-  Boolean(
-    process.env.WORKOS_CLIENT_ID &&
-    process.env.WORKOS_API_KEY &&
-    process.env.WORKOS_REDIRECT_URI &&
-    process.env.WORKOS_COOKIE_PASSWORD,
-  )
+const hasWorkOSConfig = () => Boolean(readWorkOSEnvironment())
 
 export const Route = createFileRoute('/api/auth/sign-in')({
   server: {

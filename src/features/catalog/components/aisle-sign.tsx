@@ -7,8 +7,8 @@ export function AisleSign({ aisle }: { aisle: Aisle }) {
   return (
     <Link
       className={`aisle-sign aisle-sign--${aisle.id}`}
-      search={{ aisle: aisle.id }}
-      to="/browse"
+      params={{ aisle: aisle.id }}
+      to="/aisles/$aisle"
     >
       <span className="aisle-sign__number">{aisle.motif.split(' / ')[0]}</span>
       <span>

@@ -1,5 +1,13 @@
 import { Link, createFileRoute } from '@tanstack/react-router'
+import {
+  AuthLoading,
+  Authenticated,
+  Unauthenticated,
+  useQuery,
+} from 'convex/react'
 import { ArrowRight, Check, Github, LockKeyhole, Store } from 'lucide-react'
+
+import { api } from '../../convex/_generated/api'
 
 export const Route = createFileRoute('/publish')({
   head: () => ({ meta: [{ title: 'Publish a benchmark · BenchBazaar' }] }),
@@ -45,17 +53,7 @@ function PublishPage() {
             WorkOS identity and Convex. No browser-supplied user ID will be
             trusted.
           </p>
-          <button
-            className="button button--ink button--large"
-            disabled
-            type="button"
-          >
-            <Github aria-hidden="true" size={18} /> Sign in · setup required
-          </button>
-          <small>
-            Configure the documented WorkOS environment before enabling this
-            action.
-          </small>
+          <PublishAuthState />
         </aside>
       </div>
 
@@ -66,5 +64,64 @@ function PublishPage() {
         </Link>
       </div>
     </div>
+  )
+}
+
+function PublishAuthState() {
+  return (
+    <>
+      <AuthLoading>
+        <button
+          className="button button--ink button--large"
+          disabled
+          type="button"
+        >
+          Checking session…
+        </button>
+      </AuthLoading>
+      <Unauthenticated>
+        <a
+          className="button button--ink button--large"
+          href="/api/auth/sign-in?returnPathname=%2Fpublish"
+        >
+          <Github aria-hidden="true" size={18} /> Sign in with GitHub
+        </a>
+        <small>Authentication is handled by WorkOS AuthKit.</small>
+      </Unauthenticated>
+      <Authenticated>
+        <SignedInState />
+      </Authenticated>
+    </>
+  )
+}
+
+function SignedInState() {
+  const user = useQuery(api.users.viewer, {})
+
+  if (user === undefined || user === null) {
+    return (
+      <button
+        className="button button--ink button--large"
+        disabled
+        type="button"
+      >
+        Synchronizing profile…
+      </button>
+    )
+  }
+
+  return (
+    <>
+      <button
+        className="button button--ink button--large"
+        disabled
+        type="button"
+      >
+        Signed in as @{user.handle}
+      </button>
+      <small>
+        Convex validated this session. Draft publishing is the next milestone.
+      </small>
+    </>
   )
 }

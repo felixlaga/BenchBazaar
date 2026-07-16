@@ -518,6 +518,11 @@ export const benchmarks: Array<BenchmarkDetail> = benchmarkSeeds.map(
       aisle,
       vendor: defaultVendor,
       version: '1.0.0',
+      currentVersion: '1.0.0',
+      isCurrent: true,
+      versionStatus: 'current',
+      changelog: 'Initial synthetic preview version.',
+      comparability: 'compatible',
       tags: seed.tags,
       modality: seed.modality ?? 'text',
       scorer: seed.scorer,
@@ -548,6 +553,19 @@ export const benchmarks: Array<BenchmarkDetail> = benchmarkSeeds.map(
             'One response per item with no external tools or retries.',
           primaryMetric: metric,
         },
+        ...(['code-corner', 'agent-alley', 'vision-arcade'].includes(
+          seed.aisleId,
+        )
+          ? [
+              {
+                id: 'assisted',
+                label: 'Assisted · declared tools',
+                description:
+                  'The declared evaluation tools are available, with one response per item and no hidden retries.',
+                primaryMetric: metric,
+              },
+            ]
+          : []),
       ],
       sealedSet: {
         mode: 'author_managed',
@@ -556,6 +574,15 @@ export const benchmarks: Array<BenchmarkDetail> = benchmarkSeeds.map(
         endpointExposure:
           'A model service may still observe prompts sent during evaluation, so sealed does not mean impossible to leak.',
       },
+      versions: [
+        {
+          version: '1.0.0',
+          status: 'current',
+          publishedAt: seed.date,
+          changelog: 'Initial synthetic preview version.',
+          comparability: 'compatible',
+        },
+      ],
     }
   },
 )
@@ -622,11 +649,15 @@ export const receipts: Array<Receipt> = Array.from(
         title: benchmark.title,
         version: benchmark.version,
       },
-      trackId: 'standard',
+      trackId:
+        benchmark.tracks.length > 1 && index >= benchmarks.length
+          ? 'assisted'
+          : 'standard',
       model: {
         slug: model[0],
         displayName: model[1],
         exactId: model[2],
+        provider: 'Synthetic Preview',
       },
       primaryMetric: { label: 'Score', value: score, unit: '%' },
       metrics: [
@@ -645,6 +676,19 @@ export const receipts: Array<Receipt> = Array.from(
         status: verificationStatus,
         ...verificationCopy[verificationStatus],
       },
+      state: {
+        status: 'valid',
+        label: 'Valid',
+        explanation:
+          'This receipt is eligible for its exact version and track.',
+      },
+      compatibility: {
+        compatible: true,
+        explanation:
+          'The version, track, metric, scorer, manifest, and disclosed dataset digest agree.',
+      },
+      manifestDigest: `sha256:synthetic-${benchmark.slug}-1.0.0-manifest`,
+      artifacts: [],
       synthetic: true,
     }
   },

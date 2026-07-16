@@ -7,23 +7,30 @@ benchmark's purpose, public examples, scorer, limitations, and versioned result 
 while keeping the official scored items outside the public web application.
 
 This repository contains the TanStack Start application. It currently delivers the
-public preview vertical slice with an intentionally synthetic catalog.
+public preview vertical slice from a real Convex deployment seeded with an intentionally
+synthetic catalog.
 
 ## What is implemented
 
 - TanStack Start, React 19, strict TypeScript, Tailwind CSS 4, and pnpm
 - Feature-oriented architecture with thin route modules and a catalog repository boundary
 - Responsive, keyboard-friendly global shell and bespoke BenchBazaar design system
-- Homepage, URL-driven browse/search, benchmark detail, public samples, scoped scoreboard,
-  receipt detail, trust-model, mystery-crate, and publish-preview routes
-- Twelve synthetic public benchmark listings and twenty explicitly synthetic receipts
-- Convex public MVP schema subset with no sealed-content fields
-- WorkOS AuthKit middleware/callback/sign-in scaffolding with TanStack CSRF protection
-- Unit, security-boundary, and component tests plus a GitHub Actions quality pipeline
+- Homepage, cursor-paginated browse/search with shareable filters, editorial aisle pages,
+  exact current and historical benchmark-version pages, public samples, and compatible
+  per-track scoreboards
+- Public stall and canonical model pages, receipt history/state pages, machine-readable
+  receipt JSON, social-card images, receipt badges, trust-model, and mystery-crate routes
+- Twelve synthetic public benchmark listings, fourteen immutable version snapshots,
+  forty-two explicitly public samples, and twenty explicitly synthetic receipts
+- Convex public MVP schema, bounded public queries, and an internal idempotent seed loader
+  with no sealed-content fields
+- WorkOS AuthKit login/logout UI, token forwarding to Convex on server and client, and
+  first-access user synchronization keyed by validated token subject
+- Unit, Convex authorization/data-boundary, security-boundary, and component tests
 
-The authenticated editor, deployed Convex queries, identity bridge, and real signed-runner
-workflow are not presented as complete. The public preview remains usable without cloud
-credentials; provider-backed features activate only after their environment is configured.
+The authenticated editor and real signed-runner workflow are not presented as complete.
+Managed WorkOS is configured for the linked development deployment, but browser GitHub
+login still needs an end-to-end provider check. CI remains to be added.
 
 ## Local development
 
@@ -58,14 +65,22 @@ The committed schema is ready for a development deployment. Run:
 pnpm convex:dev
 ```
 
-Convex will create `CONVEX_DEPLOYMENT` and `VITE_CONVEX_URL` in `.env.local` and generate
-its typed API. The current public repository implementation uses synthetic fixtures so a
-new contributor can run the UI before creating a cloud project. Convex remains the only
-planned application database.
+Convex will create `CONVEX_DEPLOYMENT` and `VITE_CONVEX_URL` in `.env.local`, generate its
+typed API, and configure the development AuthKit environment when the Convex team enables
+managed WorkOS provisioning. Then load the public preview data:
+
+```bash
+pnpm convex:seed
+```
+
+The seed mutation is internal-only, requires an explicit synthetic-data confirmation, and
+is safe to rerun. TanStack Start routes render through Convex queries; the fixture module is
+only an input to tests and the development seed loader.
 
 ### WorkOS AuthKit
 
-Set all four server-only values together:
+Either let `pnpm convex:dev` provision a development AuthKit environment after accepting
+the WorkOS terms, or set all four server-only values together:
 
 ```bash
 WORKOS_CLIENT_ID=client_...
@@ -77,7 +92,9 @@ WORKOS_COOKIE_PASSWORD=<32-or-more-characters>
 In the WorkOS dashboard, register the callback URI above and set the sign-in endpoint to
 `http://localhost:3000/api/auth/sign-in`. Enable GitHub as the social-login provider.
 AuthKit middleware is paired with TanStack Start's CSRF middleware; partial WorkOS
-configuration fails fast. Secrets must never use the `VITE_` prefix.
+configuration fails fast. The same `WORKOS_CLIENT_ID` must be set in the Convex deployment
+so `convex/auth.config.ts` can validate access tokens. Secrets must never use the `VITE_`
+prefix.
 
 ## Architecture and security
 

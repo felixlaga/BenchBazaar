@@ -1,4 +1,6 @@
 import { Link } from '@tanstack/react-router'
+import { AuthLoading, Authenticated, Unauthenticated } from 'convex/react'
+import { useAuth } from '@workos/authkit-tanstack-react-start/client'
 import { Menu, Search, ShoppingBasket, Store } from 'lucide-react'
 
 import { BrandMark } from '../brand/brand-mark'
@@ -52,6 +54,7 @@ export function SiteHeader() {
           >
             <ShoppingBasket aria-hidden="true" size={20} />
           </Link>
+          <DesktopAuthAction />
           <Link className="button button--ink desktop-only" to="/publish">
             <Store aria-hidden="true" size={17} />
             Publish
@@ -78,10 +81,60 @@ export function SiteHeader() {
               <Link className="mobile-menu__link" to="/publish">
                 Publish a benchmark
               </Link>
+              <MobileAuthAction />
             </nav>
           </details>
         </div>
       </div>
     </header>
+  )
+}
+
+function DesktopAuthAction() {
+  return (
+    <div className="desktop-only">
+      <AuthLoading>
+        <span className="nav-link" aria-label="Checking sign-in status">
+          Account…
+        </span>
+      </AuthLoading>
+      <Unauthenticated>
+        <a className="nav-link" href="/api/auth/sign-in">
+          Sign in
+        </a>
+      </Unauthenticated>
+      <Authenticated>
+        <SignOutButton className="nav-link auth-sign-out" />
+      </Authenticated>
+    </div>
+  )
+}
+
+function MobileAuthAction() {
+  return (
+    <>
+      <Unauthenticated>
+        <a className="mobile-menu__link" href="/api/auth/sign-in">
+          Sign in with GitHub
+        </a>
+      </Unauthenticated>
+      <Authenticated>
+        <SignOutButton className="mobile-menu__link auth-sign-out" />
+      </Authenticated>
+    </>
+  )
+}
+
+function SignOutButton({ className }: { className: string }) {
+  const { signOut } = useAuth()
+
+  return (
+    <button
+      className={className}
+      onClick={() => void signOut({ returnTo: '/' })}
+      type="button"
+    >
+      Sign out
+    </button>
   )
 }

@@ -1,4 +1,6 @@
 import { Link, createFileRoute } from '@tanstack/react-router'
+import { convexQuery } from '@convex-dev/react-query'
+import { useSuspenseQuery } from '@tanstack/react-query'
 import {
   ArrowRight,
   PackageOpen,
@@ -13,10 +15,14 @@ import { StatusBanner } from '#/components/ui/status-banner'
 import { AisleSign } from '#/features/catalog/components/aisle-sign'
 import { MarketCard } from '#/features/catalog/components/market-card'
 import { ReceiptPreview } from '#/features/catalog/components/receipt-preview'
-import { loadHomePage } from '#/features/catalog/server/catalog.functions'
+
+import { api } from '../../convex/_generated/api'
 
 export const Route = createFileRoute('/')({
-  loader: () => loadHomePage(),
+  loader: ({ context }) =>
+    context.queryClient.ensureQueryData(
+      context.convexQueryClient.queryOptions(api.catalog.home, {}),
+    ),
   head: () => ({
     meta: [
       { title: 'BenchBazaar · Odd tests. Useful signals.' },
@@ -31,7 +37,7 @@ export const Route = createFileRoute('/')({
 })
 
 function HomePage() {
-  const data = Route.useLoaderData()
+  const { data } = useSuspenseQuery(convexQuery(api.catalog.home, {}))
 
   return (
     <>

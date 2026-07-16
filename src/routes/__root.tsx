@@ -1,4 +1,6 @@
 import type { QueryClient } from '@tanstack/react-query'
+import type { ConvexQueryClient } from '@convex-dev/react-query'
+import type { ConvexReactClient } from 'convex/react'
 import {
   HeadContent,
   Outlet,
@@ -7,6 +9,7 @@ import {
 } from '@tanstack/react-router'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
+import { getAuth } from '@workos/authkit-tanstack-react-start'
 
 import { ErrorPage, NotFoundPage } from '#/components/layout/page-states'
 import { SiteFooter } from '#/components/layout/site-footer'
@@ -16,9 +19,30 @@ import appCss from '../styles.css?url'
 
 type RouterContext = {
   queryClient: QueryClient
+  convexClient: ConvexReactClient
+  convexQueryClient: ConvexQueryClient
 }
 
 export const Route = createRootRouteWithContext<RouterContext>()({
+  beforeLoad: async ({ context }) => {
+    if (!context.convexQueryClient.serverHttpClient) return {}
+
+    try {
+      const auth = await getAuth()
+      if (auth.user) {
+        context.convexQueryClient.serverHttpClient.setAuth(auth.accessToken)
+      }
+      return { user: auth.user }
+    } catch (error) {
+      if (
+        error instanceof Error &&
+        error.message.includes('AuthKit middleware is not configured')
+      ) {
+        return { user: null }
+      }
+      throw error
+    }
+  },
   head: () => ({
     meta: [
       { charSet: 'utf-8' },

@@ -20,6 +20,7 @@ export default [
       'prettier.config.js',
       '.output/**',
       '.nitro/**',
+      'convex/_generated/**',
       'dist/**',
       'node_modules/**',
     ],

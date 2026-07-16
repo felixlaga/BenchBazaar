@@ -65,6 +65,11 @@ export type BenchmarkSummary = {
 }
 
 export type BenchmarkDetail = BenchmarkSummary & {
+  currentVersion: string
+  isCurrent: boolean
+  versionStatus: 'current' | 'historical' | 'deprecated'
+  changelog: string
+  comparability: 'compatible' | 'partially_compatible' | 'incompatible'
   purpose: string
   method: string
   limitations: Array<string>
@@ -75,6 +80,15 @@ export type BenchmarkDetail = BenchmarkSummary & {
     statement: string
     endpointExposure: string
   }
+  versions: Array<BenchmarkVersionSummary>
+}
+
+export type BenchmarkVersionSummary = {
+  version: string
+  status: 'current' | 'historical' | 'deprecated'
+  publishedAt: string
+  changelog: string
+  comparability: 'compatible' | 'partially_compatible' | 'incompatible'
 }
 
 export const verificationStatuses = [
@@ -87,6 +101,15 @@ export const verificationStatuses = [
 
 export type VerificationStatus = (typeof verificationStatuses)[number]
 
+export const receiptStates = [
+  'valid',
+  'disputed',
+  'invalid',
+  'superseded',
+] as const
+
+export type ReceiptState = (typeof receiptStates)[number]
+
 export type Receipt = {
   id: string
   benchmark: Pick<BenchmarkSummary, 'slug' | 'title' | 'version'>
@@ -95,6 +118,7 @@ export type Receipt = {
     slug: string
     displayName: string
     exactId: string
+    provider: string
   }
   primaryMetric: {
     label: string
@@ -112,7 +136,78 @@ export type Receipt = {
     label: string
     explanation: string
   }
-  synthetic: true
+  state: {
+    status: ReceiptState
+    label: string
+    explanation: string
+    reason?: string
+  }
+  compatibility: {
+    compatible: boolean
+    explanation: string
+  }
+  manifestDigest: string
+  signatureFingerprint?: string
+  artifacts: Array<{ label: string; url: string; digest?: string }>
+  supersedes?: string
+  supersededBy?: string
+  synthetic: boolean
+}
+
+export type Scoreboard = {
+  track: Track
+  receipts: Array<Receipt>
+}
+
+export type BenchmarkPageData = {
+  benchmark: BenchmarkDetail
+  scoreboards: Array<Scoreboard>
+  relatedBenchmarks: Array<BenchmarkSummary>
+}
+
+export type AislePageData = {
+  aisle: Aisle
+  curatorPick?: BenchmarkSummary
+  newest: Array<BenchmarkSummary>
+  mostReproduced: Array<BenchmarkSummary>
+}
+
+export type PublicStall = {
+  handle: string
+  displayName: string
+  avatarUrl?: string
+  bio?: string
+  githubUsername?: string
+}
+
+export type StallPageData = {
+  stall: PublicStall
+  benchmarks: {
+    items: Array<BenchmarkSummary>
+    continueCursor: string
+    isDone: boolean
+  }
+  recentReceipts: Array<Receipt>
+  reproductions: Array<Receipt>
+}
+
+export type ModelPageData = {
+  model: {
+    slug: string
+    provider: string
+    canonicalId: string
+    displayName: string
+    family?: string
+    releaseDate?: string
+    aliases: Array<string>
+    status: 'active' | 'legacy' | 'disputed_identity'
+    metadataUrl?: string
+  }
+  receipts: {
+    items: Array<Receipt>
+    continueCursor: string
+    isDone: boolean
+  }
 }
 
 export type HomePageData = {

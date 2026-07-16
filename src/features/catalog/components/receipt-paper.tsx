@@ -20,7 +20,13 @@ export function ReceiptPaper({ receipt }: { receipt: Receipt }) {
         <div>
           <dt>Benchmark</dt>
           <dd>
-            <Link params={{ slug: receipt.benchmark.slug }} to="/b/$slug">
+            <Link
+              params={{
+                slug: receipt.benchmark.slug,
+                version: receipt.benchmark.version,
+              }}
+              to="/b/$slug/v/$version"
+            >
               {receipt.benchmark.title}{' '}
               <ExternalLink aria-hidden="true" size={13} />
             </Link>
@@ -34,7 +40,14 @@ export function ReceiptPaper({ receipt }: { receipt: Receipt }) {
         </div>
         <div>
           <dt>Exact model ID</dt>
-          <dd>{receipt.model.exactId}</dd>
+          <dd>
+            <Link
+              params={{ modelSlug: receipt.model.slug }}
+              to="/models/$modelSlug"
+            >
+              {receipt.model.exactId}
+            </Link>
+          </dd>
         </div>
         <div>
           <dt>Run date</dt>
@@ -79,7 +92,13 @@ export function ReceiptPaper({ receipt }: { receipt: Receipt }) {
         <BadgeCheck aria-hidden="true" size={18} />
         {receipt.verification.label}
       </div>
-      <footer>Synthetic preview data · not a real model claim</footer>
+      <div className="inspector-stamp">
+        {receipt.state.label} ·{' '}
+        {receipt.compatibility.compatible ? 'compatible' : 'incompatible'}
+      </div>
+      {receipt.synthetic && (
+        <footer>Synthetic preview data · not a real model claim</footer>
+      )}
     </article>
   )
 }

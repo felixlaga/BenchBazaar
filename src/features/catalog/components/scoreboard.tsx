@@ -3,9 +3,15 @@ import { ExternalLink } from 'lucide-react'
 
 import { formatScore } from '#/lib/format'
 
-import type { Receipt } from '../domain/catalog'
+import type { Receipt, Track } from '../domain/catalog'
 
-export function Scoreboard({ receipts }: { receipts: Array<Receipt> }) {
+export function Scoreboard({
+  receipts,
+  track,
+}: {
+  receipts: Array<Receipt>
+  track: Track
+}) {
   if (receipts.length === 0) {
     return (
       <div className="empty-state">
@@ -19,13 +25,16 @@ export function Scoreboard({ receipts }: { receipts: Array<Receipt> }) {
     <div className="scoreboard-wrap">
       <table className="scoreboard">
         <caption className="sr-only">
-          Model results for the standard no-tools track
+          Model results for {track.label}, exact track ID {track.id}
         </caption>
         <thead>
           <tr>
             <th scope="col">Rank</th>
             <th scope="col">Exact model</th>
-            <th scope="col">Score ↑</th>
+            <th scope="col">
+              {track.primaryMetric.label}{' '}
+              {track.primaryMetric.direction === 'higher' ? '↑' : '↓'}
+            </th>
             <th scope="col">Evidence</th>
             <th scope="col">Receipt</th>
           </tr>
@@ -35,7 +44,12 @@ export function Scoreboard({ receipts }: { receipts: Array<Receipt> }) {
             <tr key={receipt.id}>
               <td data-label="Rank">{index + 1}</td>
               <td data-label="Exact model">
-                <strong>{receipt.model.displayName}</strong>
+                <Link
+                  params={{ modelSlug: receipt.model.slug }}
+                  to="/models/$modelSlug"
+                >
+                  <strong>{receipt.model.displayName}</strong>
+                </Link>
                 <code>{receipt.model.exactId}</code>
               </td>
               <td data-label="Score">

@@ -72,6 +72,9 @@ importers:
         specifier: ^4.4.3
         version: 4.4.3
     devDependencies:
+      '@edge-runtime/vm':
+        specifier: ^5.0.0
+        version: 5.0.0
       '@tailwindcss/typography':
         specifier: ^0.5.16
         version: 0.5.20(tailwindcss@4.3.2)
@@ -105,6 +108,9 @@ importers:
       '@vitejs/plugin-react':
         specifier: ^6.0.1
         version: 6.0.3(vite@8.1.4(@types/node@22.20.1)(esbuild@0.27.0)(jiti@2.7.0))
+      convex-test:
+        specifier: ^0.0.54
+        version: 0.0.54(convex@1.42.2(react@19.2.7))
       eslint:
         specifier: 10.0.1
         version: 10.0.1(jiti@2.7.0)
@@ -122,7 +128,7 @@ importers:
         version: 8.1.4(@types/node@22.20.1)(esbuild@0.27.0)(jiti@2.7.0)
       vitest:
         specifier: ^4.1.5
-        version: 4.1.10(@types/node@22.20.1)(jsdom@28.1.0)(vite@8.1.4(@types/node@22.20.1)(esbuild@0.27.0)(jiti@2.7.0))
+        version: 4.1.10(@edge-runtime/vm@5.0.0)(@types/node@22.20.1)(jsdom@28.1.0)(vite@8.1.4(@types/node@22.20.1)(esbuild@0.27.0)(jiti@2.7.0))
 
 packages:
 
@@ -263,6 +269,14 @@ packages:
   '@csstools/css-tokenizer@4.0.0':
     resolution: {integrity: sha512-QxULHAm7cNu72w97JUNCBFODFaXpbDg+dP8b/oWFAZ2MTRppA3U00Y2L1HqaS4J6yBqxwa/Y3nMBaxVKbB/NsA==}
     engines: {node: '>=20.19.0'}
+
+  '@edge-runtime/primitives@6.0.0':
+    resolution: {integrity: sha512-FqoxaBT+prPBHBwE1WXS1ocnu/VLTQyZ6NMUBAdbP7N2hsFTTxMC/jMu2D/8GAlMQfxeuppcPuCUk/HO3fpIvA==}
+    engines: {node: '>=18'}
+
+  '@edge-runtime/vm@5.0.0':
+    resolution: {integrity: sha512-NKBGBSIKUG584qrS1tyxVpX/AKJKQw5HgjYEnPLC0QsTw79JrGn+qUr8CXFb955Iy7GUdiiUv1rJ6JBGvaKb6w==}
+    engines: {node: '>=18'}
 
   '@emnapi/core@1.10.0':
     resolution: {integrity: sha512-yq6OkJ4p82CAfPl0u9mQebQHKPJkY7WrIuk205cTYnYe+k2Z8YBh11FrbRG/H6ihirqcacOgl2BIO8oyMQLeXw==}
@@ -1630,6 +1644,11 @@ packages:
 
   convert-source-map@2.0.0:
     resolution: {integrity: sha512-Kvp459HrV2FEJ1CAsi1Ku+MY3kasH19TFykTz2xWmMeq6bk2NU3XXvfJ+Q61m0xktWwt+1HSYf3JZsTms3aRJg==}
+
+  convex-test@0.0.54:
+    resolution: {integrity: sha512-C0v2SQcuxrELAJRNzE6fQ686XDPor7UFoC22jcoJXeCRqhLo8ZIMZ4jyUHoo1UdAL2enCb0AbiprCVpLDN8u9Q==}
+    peerDependencies:
+      convex: ^1.32.0
 
   convex@1.42.2:
     resolution: {integrity: sha512-5Mo9EZQ45bG2nbhO7NhTTw5GF9g4RA/kgRQviUQrOI+wFCyfdeNw3PjgOZc2eOM4ruum+0QmUcvVCX5mT2v4rg==}
@@ -3030,6 +3049,12 @@ snapshots:
 
   '@csstools/css-tokenizer@4.0.0': {}
 
+  '@edge-runtime/primitives@6.0.0': {}
+
+  '@edge-runtime/vm@5.0.0':
+    dependencies:
+      '@edge-runtime/primitives': 6.0.0
+
   '@emnapi/core@1.10.0':
     dependencies:
       '@emnapi/wasi-threads': 1.2.1
@@ -4283,6 +4308,10 @@ snapshots:
 
   convert-source-map@2.0.0: {}
 
+  convex-test@0.0.54(convex@1.42.2(react@19.2.7)):
+    dependencies:
+      convex: 1.42.2(react@19.2.7)
+
   convex@1.42.2(react@19.2.7):
     dependencies:
       esbuild: 0.27.0
@@ -5228,7 +5257,7 @@ snapshots:
     optionalDependencies:
       vite: 8.1.4(@types/node@22.20.1)(esbuild@0.27.0)(jiti@2.7.0)
 
-  vitest@4.1.10(@types/node@22.20.1)(jsdom@28.1.0)(vite@8.1.4(@types/node@22.20.1)(esbuild@0.27.0)(jiti@2.7.0)):
+  vitest@4.1.10(@edge-runtime/vm@5.0.0)(@types/node@22.20.1)(jsdom@28.1.0)(vite@8.1.4(@types/node@22.20.1)(esbuild@0.27.0)(jiti@2.7.0)):
     dependencies:
       '@vitest/expect': 4.1.10
       '@vitest/mocker': 4.1.10(vite@8.1.4(@types/node@22.20.1)(esbuild@0.27.0)(jiti@2.7.0))
@@ -5251,6 +5280,7 @@ snapshots:
       vite: 8.1.4(@types/node@22.20.1)(esbuild@0.27.0)(jiti@2.7.0)
       why-is-node-running: 2.3.0
     optionalDependencies:
+      '@edge-runtime/vm': 5.0.0
       '@types/node': 22.20.1
       jsdom: 28.1.0
     transitivePeerDependencies:

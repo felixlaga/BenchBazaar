@@ -88,29 +88,73 @@ export default defineSchema({
       v.literal('archived'),
     ),
     currentVersionId: v.optional(v.id('benchmarkVersions')),
+    currentVersion: v.optional(v.string()),
     title: v.string(),
     summary: v.string(),
     aisle: v.string(),
     tags: v.array(v.string()),
     modalities: v.array(v.string()),
+    primaryModality: v.optional(v.string()),
+    scorerCategory: v.optional(v.string()),
+    sealed: v.optional(v.boolean()),
+    hasReceipts: v.optional(v.boolean()),
     searchText: v.string(),
     coverImageStorageId: v.optional(v.id('_storage')),
+    scorerLabel: v.string(),
+    publicSampleCount: v.number(),
+    sealedItemCount: v.number(),
     receiptCount: v.number(),
+    distinctModelCount: v.number(),
     independentReproductionCount: v.number(),
     saveCount: v.number(),
+    curatorPick: v.boolean(),
+    runnerAvailable: v.boolean(),
+    synthetic: v.boolean(),
     publishedAt: v.optional(v.number()),
     updatedAt: v.number(),
     createdAt: v.number(),
   })
     .index('by_ownerId', ['ownerId'])
+    .index('by_ownerId_status_publishedAt', [
+      'ownerId',
+      'status',
+      'publishedAt',
+    ])
     .index('by_ownerId_slug', ['ownerId', 'slug'])
     .index('by_publicRef', ['publicRef'])
+    .index('by_slug', ['slug'])
     .index('by_status_publishedAt', ['status', 'publishedAt'])
+    .index('by_status_aisle_publishedAt', ['status', 'aisle', 'publishedAt'])
     .index('by_aisle_publishedAt', ['aisle', 'publishedAt'])
     .index('by_status_receiptCount', ['status', 'receiptCount'])
+    .index('by_status_aisle_receiptCount', ['status', 'aisle', 'receiptCount'])
+    .index('by_status_aisle_reproductionCount', [
+      'status',
+      'aisle',
+      'independentReproductionCount',
+    ])
+    .index('by_status_curatorPick_publishedAt', [
+      'status',
+      'curatorPick',
+      'publishedAt',
+    ])
+    .index('by_status_aisle_curatorPick_publishedAt', [
+      'status',
+      'aisle',
+      'curatorPick',
+      'publishedAt',
+    ])
     .searchIndex('search_public', {
       searchField: 'searchText',
-      filterFields: ['status', 'aisle'],
+      filterFields: [
+        'status',
+        'aisle',
+        'primaryModality',
+        'scorerCategory',
+        'sealed',
+        'hasReceipts',
+        'curatorPick',
+      ],
     }),
 
   benchmarkVersions: defineTable({
@@ -236,7 +280,22 @@ export default defineSchema({
     ),
     completedAt: v.number(),
     submittedAt: v.number(),
+    artifactRefs: v.optional(
+      v.array(
+        v.object({
+          label: v.string(),
+          url: v.string(),
+          digest: v.optional(v.string()),
+        }),
+      ),
+    ),
+    notesMarkdown: v.optional(v.string()),
+    supersedesReceiptId: v.optional(v.id('receipts')),
+    disputeSummary: v.optional(v.string()),
+    moderationReason: v.optional(v.string()),
+    signatureFingerprint: v.optional(v.string()),
     signatureValid: v.boolean(),
+    synthetic: v.boolean(),
   })
     .index('by_publicId', ['publicId'])
     .index('by_benchmarkVersionId_trackId', ['benchmarkVersionId', 'trackId'])
@@ -246,6 +305,7 @@ export default defineSchema({
       'modelId',
     ])
     .index('by_modelId_completedAt', ['modelId', 'completedAt'])
+    .index('by_supersedesReceiptId', ['supersedesReceiptId'])
     .index('by_status_submittedAt', ['status', 'submittedAt'])
     .index('by_submittedByUserId_submittedAt', [
       'submittedByUserId',
