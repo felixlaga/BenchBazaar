@@ -13,16 +13,20 @@ src/
     layout/             Global shell and route-level states
     ui/                 Small cross-feature UI primitives
   features/
+    basket/             Authenticated save controls and basket views
     catalog/
       components/       Catalog-specific presentational components
       data/             Explicitly synthetic public preview fixtures
       domain/           Framework-independent domain types
       server/           Catalog repository boundary and focused tests
+    publishing/         Profile, owner-workspace, and draft-editor components
   lib/                  Cross-cutting helpers and security utilities
   routes/               Thin TanStack Start route modules
 convex/
   auth.config.ts        WorkOS JWT validation for Convex
   catalog.ts            Purpose-built public catalog queries
+  drafts.ts             Owner-only draft, autosave, successor, and publish mutations
+  basket.ts             Identity-derived basket queries and mutations
   users.ts              Protected current-user query and identity synchronization
   seed.ts               Internal-only synthetic development seed loader
   schema.ts             Public MVP schema subset; no sealed-content fields
@@ -51,6 +55,14 @@ Convex owns application data, authorization, draft/publish state transitions, se
 receipt ingestion, and audit events. TanStack Start owns rendering, route metadata,
 authentication routes, and thin server-only adapters. A separate trusted runner owns
 hidden items, model calls, scoring, redaction, and receipt signing.
+
+Mutable drafts and their deliberately public samples live in owner-protected Convex
+tables. Publishing validates the complete snapshot, derives ownership from the WorkOS
+identity, creates a new immutable version plus public-sample records in one mutation,
+updates the stable benchmark pointer, and records a private audit event. Corrections begin
+from a successor draft; published version content is never edited in place. Basket saves
+use the same identity-derived authorization boundary and never accept a browser-supplied
+owner ID.
 
 ## Protected-data rule
 

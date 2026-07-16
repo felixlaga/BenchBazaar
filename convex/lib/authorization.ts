@@ -79,3 +79,21 @@ export async function requireBenchmarkOwner(
 
   return { benchmark, user }
 }
+
+export async function requireDraftOwner(
+  ctx: ReadContext,
+  draftId: Id<'benchmarkDrafts'>,
+) {
+  const user = await requireUser(ctx)
+  const draft = await ctx.db.get('benchmarkDrafts', draftId)
+
+  if (!draft) {
+    throw new ConvexError({ code: 'DRAFT_NOT_FOUND' })
+  }
+
+  if (draft.ownerId !== user._id && roleRank[user.role] < roleRank.admin) {
+    throw new ConvexError({ code: 'FORBIDDEN' })
+  }
+
+  return { draft, user }
+}

@@ -85,6 +85,7 @@ export const loadSyntheticCatalog = internalMutation({
         bio: 'Synthetic preview fixtures maintained by the BenchBazaar project.',
         role: 'curator',
         status: 'active',
+        profileComplete: true,
         createdAt: now,
         updatedAt: now,
       })
@@ -92,6 +93,9 @@ export const loadSyntheticCatalog = internalMutation({
     }
 
     if (!owner) throw new Error('Could not create the synthetic seed owner.')
+    if (!owner.profileComplete) {
+      await ctx.db.patch(owner._id, { profileComplete: true })
+    }
 
     const benchmarkIds = new Map<string, Id<'benchmarks'>>()
     const versionIds = new Map<string, Id<'benchmarkVersions'>>()

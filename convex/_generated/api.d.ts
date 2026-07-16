@@ -8,7 +8,9 @@
  * @module
  */
 
+import type * as basket from "../basket.js";
 import type * as catalog from "../catalog.js";
+import type * as drafts from "../drafts.js";
 import type * as lib_authorization from "../lib/authorization.js";
 import type * as seed from "../seed.js";
 import type * as users from "../users.js";
@@ -20,7 +22,9 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  basket: typeof basket;
   catalog: typeof catalog;
+  drafts: typeof drafts;
   "lib/authorization": typeof lib_authorization;
   seed: typeof seed;
   users: typeof users;

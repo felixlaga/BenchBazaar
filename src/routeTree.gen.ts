@@ -11,14 +11,19 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as PublishRouteImport } from './routes/publish'
 import { Route as MysteryRouteImport } from './routes/mystery'
+import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as BrowseRouteImport } from './routes/browse'
+import { Route as BasketRouteImport } from './routes/basket'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as StallsHandleRouteImport } from './routes/stalls.$handle'
+import { Route as SettingsProfileRouteImport } from './routes/settings.profile'
 import { Route as ReceiptsReceiptIdRouteImport } from './routes/receipts.$receiptId'
 import { Route as ModelsModelSlugRouteImport } from './routes/models.$modelSlug'
+import { Route as DraftsDraftIdRouteImport } from './routes/drafts.$draftId'
 import { Route as BSlugRouteImport } from './routes/b.$slug'
 import { Route as AislesAisleRouteImport } from './routes/aisles.$aisle'
+import { Route as BSlugEditRouteImport } from './routes/b.$slug.edit'
 import { Route as ApiReceiptsReceiptIdRouteImport } from './routes/api.receipts.$receiptId'
 import { Route as ApiAuthSignInRouteImport } from './routes/api.auth.sign-in'
 import { Route as ApiAuthCallbackRouteImport } from './routes/api.auth.callback'
@@ -36,9 +41,19 @@ const MysteryRoute = MysteryRouteImport.update({
   path: '/mystery',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const BrowseRoute = BrowseRouteImport.update({
   id: '/browse',
   path: '/browse',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BasketRoute = BasketRouteImport.update({
+  id: '/basket',
+  path: '/basket',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AboutRoute = AboutRouteImport.update({
@@ -56,6 +71,11 @@ const StallsHandleRoute = StallsHandleRouteImport.update({
   path: '/stalls/$handle',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SettingsProfileRoute = SettingsProfileRouteImport.update({
+  id: '/settings/profile',
+  path: '/settings/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ReceiptsReceiptIdRoute = ReceiptsReceiptIdRouteImport.update({
   id: '/receipts/$receiptId',
   path: '/receipts/$receiptId',
@@ -64,6 +84,11 @@ const ReceiptsReceiptIdRoute = ReceiptsReceiptIdRouteImport.update({
 const ModelsModelSlugRoute = ModelsModelSlugRouteImport.update({
   id: '/models/$modelSlug',
   path: '/models/$modelSlug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DraftsDraftIdRoute = DraftsDraftIdRouteImport.update({
+  id: '/drafts/$draftId',
+  path: '/drafts/$draftId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BSlugRoute = BSlugRouteImport.update({
@@ -75,6 +100,11 @@ const AislesAisleRoute = AislesAisleRouteImport.update({
   id: '/aisles/$aisle',
   path: '/aisles/$aisle',
   getParentRoute: () => rootRouteImport,
+} as any)
+const BSlugEditRoute = BSlugEditRouteImport.update({
+  id: '/edit',
+  path: '/edit',
+  getParentRoute: () => BSlugRoute,
 } as any)
 const ApiReceiptsReceiptIdRoute = ApiReceiptsReceiptIdRouteImport.update({
   id: '/api/receipts/$receiptId',
@@ -111,17 +141,22 @@ const ApiSocialBenchmarkSlugRoute = ApiSocialBenchmarkSlugRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/basket': typeof BasketRoute
   '/browse': typeof BrowseRoute
+  '/dashboard': typeof DashboardRoute
   '/mystery': typeof MysteryRoute
   '/publish': typeof PublishRoute
   '/aisles/$aisle': typeof AislesAisleRoute
   '/b/$slug': typeof BSlugRouteWithChildren
+  '/drafts/$draftId': typeof DraftsDraftIdRoute
   '/models/$modelSlug': typeof ModelsModelSlugRoute
   '/receipts/$receiptId': typeof ReceiptsReceiptIdRoute
+  '/settings/profile': typeof SettingsProfileRoute
   '/stalls/$handle': typeof StallsHandleRoute
   '/api/auth/callback': typeof ApiAuthCallbackRoute
   '/api/auth/sign-in': typeof ApiAuthSignInRoute
   '/api/receipts/$receiptId': typeof ApiReceiptsReceiptIdRoute
+  '/b/$slug/edit': typeof BSlugEditRoute
   '/api/social/benchmark/$slug': typeof ApiSocialBenchmarkSlugRoute
   '/api/social/receipt/$receiptId': typeof ApiSocialReceiptReceiptIdRoute
   '/b/$slug/v/$version': typeof BSlugVVersionRoute
@@ -129,17 +164,22 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/basket': typeof BasketRoute
   '/browse': typeof BrowseRoute
+  '/dashboard': typeof DashboardRoute
   '/mystery': typeof MysteryRoute
   '/publish': typeof PublishRoute
   '/aisles/$aisle': typeof AislesAisleRoute
   '/b/$slug': typeof BSlugRouteWithChildren
+  '/drafts/$draftId': typeof DraftsDraftIdRoute
   '/models/$modelSlug': typeof ModelsModelSlugRoute
   '/receipts/$receiptId': typeof ReceiptsReceiptIdRoute
+  '/settings/profile': typeof SettingsProfileRoute
   '/stalls/$handle': typeof StallsHandleRoute
   '/api/auth/callback': typeof ApiAuthCallbackRoute
   '/api/auth/sign-in': typeof ApiAuthSignInRoute
   '/api/receipts/$receiptId': typeof ApiReceiptsReceiptIdRoute
+  '/b/$slug/edit': typeof BSlugEditRoute
   '/api/social/benchmark/$slug': typeof ApiSocialBenchmarkSlugRoute
   '/api/social/receipt/$receiptId': typeof ApiSocialReceiptReceiptIdRoute
   '/b/$slug/v/$version': typeof BSlugVVersionRoute
@@ -148,17 +188,22 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/basket': typeof BasketRoute
   '/browse': typeof BrowseRoute
+  '/dashboard': typeof DashboardRoute
   '/mystery': typeof MysteryRoute
   '/publish': typeof PublishRoute
   '/aisles/$aisle': typeof AislesAisleRoute
   '/b/$slug': typeof BSlugRouteWithChildren
+  '/drafts/$draftId': typeof DraftsDraftIdRoute
   '/models/$modelSlug': typeof ModelsModelSlugRoute
   '/receipts/$receiptId': typeof ReceiptsReceiptIdRoute
+  '/settings/profile': typeof SettingsProfileRoute
   '/stalls/$handle': typeof StallsHandleRoute
   '/api/auth/callback': typeof ApiAuthCallbackRoute
   '/api/auth/sign-in': typeof ApiAuthSignInRoute
   '/api/receipts/$receiptId': typeof ApiReceiptsReceiptIdRoute
+  '/b/$slug/edit': typeof BSlugEditRoute
   '/api/social/benchmark/$slug': typeof ApiSocialBenchmarkSlugRoute
   '/api/social/receipt/$receiptId': typeof ApiSocialReceiptReceiptIdRoute
   '/b/$slug/v/$version': typeof BSlugVVersionRoute
@@ -168,17 +213,22 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/about'
+    | '/basket'
     | '/browse'
+    | '/dashboard'
     | '/mystery'
     | '/publish'
     | '/aisles/$aisle'
     | '/b/$slug'
+    | '/drafts/$draftId'
     | '/models/$modelSlug'
     | '/receipts/$receiptId'
+    | '/settings/profile'
     | '/stalls/$handle'
     | '/api/auth/callback'
     | '/api/auth/sign-in'
     | '/api/receipts/$receiptId'
+    | '/b/$slug/edit'
     | '/api/social/benchmark/$slug'
     | '/api/social/receipt/$receiptId'
     | '/b/$slug/v/$version'
@@ -186,17 +236,22 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/about'
+    | '/basket'
     | '/browse'
+    | '/dashboard'
     | '/mystery'
     | '/publish'
     | '/aisles/$aisle'
     | '/b/$slug'
+    | '/drafts/$draftId'
     | '/models/$modelSlug'
     | '/receipts/$receiptId'
+    | '/settings/profile'
     | '/stalls/$handle'
     | '/api/auth/callback'
     | '/api/auth/sign-in'
     | '/api/receipts/$receiptId'
+    | '/b/$slug/edit'
     | '/api/social/benchmark/$slug'
     | '/api/social/receipt/$receiptId'
     | '/b/$slug/v/$version'
@@ -204,17 +259,22 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/about'
+    | '/basket'
     | '/browse'
+    | '/dashboard'
     | '/mystery'
     | '/publish'
     | '/aisles/$aisle'
     | '/b/$slug'
+    | '/drafts/$draftId'
     | '/models/$modelSlug'
     | '/receipts/$receiptId'
+    | '/settings/profile'
     | '/stalls/$handle'
     | '/api/auth/callback'
     | '/api/auth/sign-in'
     | '/api/receipts/$receiptId'
+    | '/b/$slug/edit'
     | '/api/social/benchmark/$slug'
     | '/api/social/receipt/$receiptId'
     | '/b/$slug/v/$version'
@@ -223,13 +283,17 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
+  BasketRoute: typeof BasketRoute
   BrowseRoute: typeof BrowseRoute
+  DashboardRoute: typeof DashboardRoute
   MysteryRoute: typeof MysteryRoute
   PublishRoute: typeof PublishRoute
   AislesAisleRoute: typeof AislesAisleRoute
   BSlugRoute: typeof BSlugRouteWithChildren
+  DraftsDraftIdRoute: typeof DraftsDraftIdRoute
   ModelsModelSlugRoute: typeof ModelsModelSlugRoute
   ReceiptsReceiptIdRoute: typeof ReceiptsReceiptIdRoute
+  SettingsProfileRoute: typeof SettingsProfileRoute
   StallsHandleRoute: typeof StallsHandleRoute
   ApiAuthCallbackRoute: typeof ApiAuthCallbackRoute
   ApiAuthSignInRoute: typeof ApiAuthSignInRoute
@@ -254,11 +318,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MysteryRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/browse': {
       id: '/browse'
       path: '/browse'
       fullPath: '/browse'
       preLoaderRoute: typeof BrowseRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/basket': {
+      id: '/basket'
+      path: '/basket'
+      fullPath: '/basket'
+      preLoaderRoute: typeof BasketRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/about': {
@@ -282,6 +360,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StallsHandleRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/settings/profile': {
+      id: '/settings/profile'
+      path: '/settings/profile'
+      fullPath: '/settings/profile'
+      preLoaderRoute: typeof SettingsProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/receipts/$receiptId': {
       id: '/receipts/$receiptId'
       path: '/receipts/$receiptId'
@@ -294,6 +379,13 @@ declare module '@tanstack/react-router' {
       path: '/models/$modelSlug'
       fullPath: '/models/$modelSlug'
       preLoaderRoute: typeof ModelsModelSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/drafts/$draftId': {
+      id: '/drafts/$draftId'
+      path: '/drafts/$draftId'
+      fullPath: '/drafts/$draftId'
+      preLoaderRoute: typeof DraftsDraftIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/b/$slug': {
@@ -309,6 +401,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/aisles/$aisle'
       preLoaderRoute: typeof AislesAisleRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/b/$slug/edit': {
+      id: '/b/$slug/edit'
+      path: '/edit'
+      fullPath: '/b/$slug/edit'
+      preLoaderRoute: typeof BSlugEditRouteImport
+      parentRoute: typeof BSlugRoute
     }
     '/api/receipts/$receiptId': {
       id: '/api/receipts/$receiptId'
@@ -356,10 +455,12 @@ declare module '@tanstack/react-router' {
 }
 
 interface BSlugRouteChildren {
+  BSlugEditRoute: typeof BSlugEditRoute
   BSlugVVersionRoute: typeof BSlugVVersionRoute
 }
 
 const BSlugRouteChildren: BSlugRouteChildren = {
+  BSlugEditRoute: BSlugEditRoute,
   BSlugVVersionRoute: BSlugVVersionRoute,
 }
 
@@ -368,13 +469,17 @@ const BSlugRouteWithChildren = BSlugRoute._addFileChildren(BSlugRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
+  BasketRoute: BasketRoute,
   BrowseRoute: BrowseRoute,
+  DashboardRoute: DashboardRoute,
   MysteryRoute: MysteryRoute,
   PublishRoute: PublishRoute,
   AislesAisleRoute: AislesAisleRoute,
   BSlugRoute: BSlugRouteWithChildren,
+  DraftsDraftIdRoute: DraftsDraftIdRoute,
   ModelsModelSlugRoute: ModelsModelSlugRoute,
   ReceiptsReceiptIdRoute: ReceiptsReceiptIdRoute,
+  SettingsProfileRoute: SettingsProfileRoute,
   StallsHandleRoute: StallsHandleRoute,
   ApiAuthCallbackRoute: ApiAuthCallbackRoute,
   ApiAuthSignInRoute: ApiAuthSignInRoute,

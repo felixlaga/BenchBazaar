@@ -40,6 +40,7 @@ const sealedPolicy = v.object({
     v.literal('manual_signed'),
     v.literal('author_runner'),
     v.literal('remote_runner'),
+    v.literal('managed_later'),
   ),
   itemCount: v.optional(v.number()),
   datasetDigest: v.optional(v.string()),
@@ -71,6 +72,7 @@ export default defineSchema({
     createdAt: v.number(),
     updatedAt: v.number(),
     lastSeenAt: v.optional(v.number()),
+    profileComplete: v.optional(v.boolean()),
   })
     .index('by_externalId', ['externalId'])
     .index('by_handle', ['handle'])
@@ -201,6 +203,57 @@ export default defineSchema({
     .index('by_publicRef', ['publicRef'])
     .index('by_status_publishedAt', ['status', 'publishedAt']),
 
+  benchmarkDrafts: defineTable({
+    benchmarkId: v.id('benchmarks'),
+    ownerId: v.id('users'),
+    baseVersionId: v.optional(v.id('benchmarkVersions')),
+    publishedVersionId: v.optional(v.id('benchmarkVersions')),
+    proposedVersion: v.string(),
+    slug: v.string(),
+    title: v.string(),
+    summary: v.string(),
+    aisle: v.string(),
+    tags: v.array(v.string()),
+    modalities: v.array(v.string()),
+    capabilityStatement: v.string(),
+    whyItMatters: v.string(),
+    intendedUse: v.string(),
+    supportedClaims: v.string(),
+    unsupportedClaims: v.string(),
+    methodMarkdown: v.string(),
+    limitationsMarkdown: v.string(),
+    license: v.optional(v.string()),
+    repositoryUrl: v.optional(v.string()),
+    writeupUrl: v.optional(v.string()),
+    sealedPolicy,
+    tracks: v.array(track),
+    changelogMarkdown: v.string(),
+    status: v.union(
+      v.literal('editing'),
+      v.literal('ready'),
+      v.literal('publishing'),
+      v.literal('published'),
+      v.literal('abandoned'),
+    ),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index('by_ownerId_updatedAt', ['ownerId', 'updatedAt'])
+    .index('by_benchmarkId_status', ['benchmarkId', 'status']),
+
+  draftSamples: defineTable({
+    draftId: v.id('benchmarkDrafts'),
+    ownerId: v.id('users'),
+    publicSampleId: v.string(),
+    position: v.number(),
+    inputMarkdown: v.string(),
+    expectedMarkdown: v.optional(v.string()),
+    explanationMarkdown: v.optional(v.string()),
+    confirmedDisplayOnly: v.boolean(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  }).index('by_draftId_position', ['draftId', 'position']),
+
   publicSamples: defineTable({
     benchmarkVersionId: v.id('benchmarkVersions'),
     benchmarkId: v.id('benchmarks'),
@@ -310,5 +363,29 @@ export default defineSchema({
     .index('by_submittedByUserId_submittedAt', [
       'submittedByUserId',
       'submittedAt',
+    ]),
+
+  basketSaves: defineTable({
+    userId: v.id('users'),
+    benchmarkId: v.id('benchmarks'),
+    createdAt: v.number(),
+  })
+    .index('by_userId_createdAt', ['userId', 'createdAt'])
+    .index('by_userId_benchmarkId', ['userId', 'benchmarkId'])
+    .index('by_benchmarkId', ['benchmarkId']),
+
+  auditEvents: defineTable({
+    actorId: v.id('users'),
+    action: v.string(),
+    targetType: v.string(),
+    targetId: v.string(),
+    publicSummary: v.optional(v.string()),
+    createdAt: v.number(),
+  })
+    .index('by_actorId_createdAt', ['actorId', 'createdAt'])
+    .index('by_targetType_targetId_createdAt', [
+      'targetType',
+      'targetId',
+      'createdAt',
     ]),
 })

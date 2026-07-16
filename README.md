@@ -26,11 +26,17 @@ synthetic catalog.
   with no sealed-content fields
 - WorkOS AuthKit login/logout UI, token forwarding to Convex on server and client, and
   first-access user synchronization keyed by validated token subject
+- Protected profile setup, owner dashboard, mutable benchmark drafts with visible
+  autosave, public-sample and multi-track editors, and an atomic immutable publish
+  transaction
+- Successor-version drafts, authenticated basket saves, centralized ownership checks,
+  and private publish audit events
 - Unit, Convex authorization/data-boundary, security-boundary, and component tests
 
-The authenticated editor and real signed-runner workflow are not presented as complete.
+The real receipt-submission and signed-runner workflows are not presented as complete.
 Managed WorkOS is configured for the linked development deployment, but browser GitHub
-login still needs an end-to-end provider check. CI remains to be added.
+login and the full publish journey still need an end-to-end provider check. CI remains to
+be added.
 
 ## Local development
 
@@ -106,7 +112,7 @@ private keys. Public free samples are separate records and always carry
 `includedInOfficialScore: false`. The future sealed runner—not TanStack Start or a public
 Convex function—owns hidden items and scoring.
 
-Published versions will be immutable, receipts append-only, and scoreboards scoped to one
+Published versions are immutable, receipts are append-only, and scoreboards are scoped to one
 exact benchmark version and track. A signed receipt proves source and integrity; it does
 not prove scientific truth.
 

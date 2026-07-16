@@ -48,9 +48,9 @@ export function SiteHeader() {
             />
           </form>
           <Link
-            aria-label="Browse saved benchmarks"
+            aria-label="Open saved benchmark basket"
             className="icon-button desktop-only"
-            to="/browse"
+            to="/basket"
           >
             <ShoppingBasket aria-hidden="true" size={20} />
           </Link>
@@ -104,7 +104,12 @@ function DesktopAuthAction() {
         </a>
       </Unauthenticated>
       <Authenticated>
-        <SignOutButton className="nav-link auth-sign-out" />
+        <div className="account-links">
+          <Link className="nav-link" to="/dashboard">
+            Dashboard
+          </Link>
+          <SignOutButton className="nav-link auth-sign-out" />
+        </div>
       </Authenticated>
     </div>
   )
@@ -119,6 +124,15 @@ function MobileAuthAction() {
         </a>
       </Unauthenticated>
       <Authenticated>
+        <Link className="mobile-menu__link" to="/dashboard">
+          My stall dashboard
+        </Link>
+        <Link className="mobile-menu__link" to="/basket">
+          Basket
+        </Link>
+        <Link className="mobile-menu__link" to="/settings/profile">
+          Profile settings
+        </Link>
         <SignOutButton className="mobile-menu__link auth-sign-out" />
       </Authenticated>
     </>

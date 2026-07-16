@@ -13,6 +13,7 @@ import {
 
 import { SectionHeading } from '#/components/ui/section-heading'
 import { StatusBanner } from '#/components/ui/status-banner'
+import { BasketButton } from '#/features/basket/components/basket-button'
 import { formatDate } from '#/lib/format'
 
 import type { BenchmarkPageData } from '../domain/catalog'
@@ -99,6 +100,7 @@ export function BenchmarkPage({
                     Stable v{benchmark.version} URL
                   </Link>
                 )}
+                <BasketButton slug={benchmark.slug} />
               </div>
             </div>
             <aside className="listing-ticket">

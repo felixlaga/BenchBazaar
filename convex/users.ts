@@ -1,10 +1,22 @@
 import type { UserIdentity } from 'convex/server'
-import { ConvexError } from 'convex/values'
+import { ConvexError, v } from 'convex/values'
 
 import type { Doc } from './_generated/dataModel'
 import type { MutationCtx } from './_generated/server'
 import { mutation, query as defineQuery } from './_generated/server'
-import { requireIdentity } from './lib/authorization'
+import { requireIdentity, requireUser } from './lib/authorization'
+
+const reservedHandles = new Set([
+  'admin',
+  'api',
+  'benchbazaar',
+  'browse',
+  'dashboard',
+  'moderation',
+  'publish',
+  'settings',
+  'support',
+])
 
 export function normalizeHandle(value: string) {
   return value
@@ -26,6 +38,7 @@ function toSafeUser(user: Doc<'users'>) {
     status: user.status,
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,
+    profileComplete: user.profileComplete ?? false,
   }
 }
 
@@ -112,6 +125,7 @@ export const syncCurrent = mutation({
       ...(identity.email ? { email: identity.email } : {}),
       role: 'member',
       status: 'active',
+      profileComplete: false,
       createdAt: now,
       updatedAt: now,
       lastSeenAt: now,
@@ -123,5 +137,70 @@ export const syncCurrent = mutation({
     }
 
     return toSafeUser(user)
+  },
+})
+
+export const updateProfile = mutation({
+  args: {
+    handle: v.string(),
+    displayName: v.string(),
+    bio: v.string(),
+    githubUsername: v.string(),
+    avatarUrl: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const user = await requireUser(ctx)
+    const requestedHandle = args.handle.trim().toLowerCase()
+    const handle = normalizeHandle(requestedHandle)
+    if (
+      handle !== requestedHandle ||
+      handle.length < 3 ||
+      handle.length > 32 ||
+      reservedHandles.has(handle)
+    ) {
+      throw new ConvexError({ code: 'INVALID_HANDLE' })
+    }
+
+    const displayName = args.displayName.trim()
+    const bio = args.bio.trim()
+    const githubUsername = args.githubUsername.trim()
+    const avatarUrl = args.avatarUrl.trim()
+    if (!displayName || displayName.length > 80 || bio.length > 280) {
+      throw new ConvexError({ code: 'INVALID_PROFILE' })
+    }
+    if (
+      githubUsername &&
+      !/^[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,37}[a-zA-Z0-9])?$/.test(githubUsername)
+    ) {
+      throw new ConvexError({ code: 'INVALID_GITHUB_USERNAME' })
+    }
+    if (avatarUrl) {
+      try {
+        if (new URL(avatarUrl).protocol !== 'https:') throw new Error()
+      } catch {
+        throw new ConvexError({ code: 'INVALID_AVATAR_URL' })
+      }
+    }
+
+    const collision = await ctx.db
+      .query('users')
+      .withIndex('by_handle', (query) => query.eq('handle', handle))
+      .unique()
+    if (collision && collision._id !== user._id) {
+      throw new ConvexError({ code: 'HANDLE_TAKEN' })
+    }
+
+    await ctx.db.patch(user._id, {
+      handle,
+      displayName,
+      bio: bio || undefined,
+      githubUsername: githubUsername || undefined,
+      avatarUrl: avatarUrl || undefined,
+      profileComplete: true,
+      updatedAt: Date.now(),
+    })
+    const updated = await ctx.db.get('users', user._id)
+    if (!updated) throw new ConvexError({ code: 'PROFILE_UPDATE_FAILED' })
+    return toSafeUser(updated)
   },
 })

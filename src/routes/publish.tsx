@@ -1,13 +1,8 @@
 import { Link, createFileRoute } from '@tanstack/react-router'
-import {
-  AuthLoading,
-  Authenticated,
-  Unauthenticated,
-  useQuery,
-} from 'convex/react'
+import { AuthLoading, Authenticated, Unauthenticated } from 'convex/react'
 import { ArrowRight, Check, Github, LockKeyhole, Store } from 'lucide-react'
 
-import { api } from '../../convex/_generated/api'
+import { OwnerWorkspace } from '#/features/publishing/components/owner-workspace'
 
 export const Route = createFileRoute('/publish')({
   head: () => ({ meta: [{ title: 'Publish a benchmark · BenchBazaar' }] }),
@@ -21,8 +16,9 @@ function PublishPage() {
         <p className="eyebrow">Set up your stall</p>
         <h1>Turn a useful question into an inspectable benchmark.</h1>
         <p>
-          The authenticated editor is the next vertical slice. This scaffold
-          already establishes the public contract it must publish into.
+          Build the listing, public samples, tracks, sealed-set policy, and
+          limitations in the browser. Convex owns autosave, validation,
+          ownership, and the atomic immutable publish.
         </p>
       </header>
 
@@ -49,7 +45,7 @@ function PublishPage() {
           <p className="eyebrow">Authentication boundary</p>
           <h2>GitHub sign-in through WorkOS</h2>
           <p>
-            Drafts, ownership, and publishing will be server-authorized through
+            Drafts, ownership, and publishing are server-authorized through
             WorkOS identity and Convex. No browser-supplied user ID will be
             trusted.
           </p>
@@ -89,39 +85,8 @@ function PublishAuthState() {
         <small>Authentication is handled by WorkOS AuthKit.</small>
       </Unauthenticated>
       <Authenticated>
-        <SignedInState />
+        <OwnerWorkspace compact />
       </Authenticated>
-    </>
-  )
-}
-
-function SignedInState() {
-  const user = useQuery(api.users.viewer, {})
-
-  if (user === undefined || user === null) {
-    return (
-      <button
-        className="button button--ink button--large"
-        disabled
-        type="button"
-      >
-        Synchronizing profile…
-      </button>
-    )
-  }
-
-  return (
-    <>
-      <button
-        className="button button--ink button--large"
-        disabled
-        type="button"
-      >
-        Signed in as @{user.handle}
-      </button>
-      <small>
-        Convex validated this session. Draft publishing is the next milestone.
-      </small>
     </>
   )
 }
