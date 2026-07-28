@@ -1,0 +1,25 @@
+{
+  "protocolVersion": "1.0.0",
+  "receiptId": "BBR-EXAMPLE-ONLY",
+  "runnerId": "runner-example-only",
+  "nonce": "example-nonce-not-for-production",
+  "benchmarkPublicRef": "benchmark:example-only",
+  "benchmarkVersion": "1.0.0",
+  "trackId": "default",
+  "modelId": "provider/exact-model-id",
+  "metrics": [
+    {
+      "key": "accuracy",
+      "value": 0.8
+    }
+  ],
+  "primaryMetricKey": "accuracy",
+  "primaryMetricValue": 0.8,
+  "itemCount": 10,
+  "scorerVersion": "example-scorer-1",
+  "configurationDigest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+  "manifestDigest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "datasetDigest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "completedAt": "2026-07-28T12:00:00.000Z",
+  "endpointExposure": "trusted_local_model"
+}

@@ -1,0 +1,17 @@
+{
+  "protocolVersion": "1.0.0",
+  "benchmark": {
+    "publicRef": "benchmark:example-only",
+    "version": "1.0.0",
+    "manifestDigest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  },
+  "tracks": [
+    {
+      "id": "default",
+      "primaryMetricKey": "accuracy",
+      "scorerVersion": "example-scorer-1",
+      "itemCount": 10,
+      "datasetDigest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+    }
+  ]
+}

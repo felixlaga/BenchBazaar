@@ -1,0 +1,12 @@
+{
+  "name": "@benchbazaar/runner",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "bb-runner": "./src/cli.mjs"
+  },
+  "dependencies": {
+    "@benchbazaar/protocol": "workspace:*"
+  }
+}
