@@ -6,9 +6,10 @@ BenchBazaar is an open registry for community-made LLM benchmarks. Authors publi
 benchmark's purpose, public examples, scorer, limitations, and versioned result receipts
 while keeping the official scored items outside the public web application.
 
-This repository contains the TanStack Start application. It currently delivers the
-public preview vertical slice from a real Convex deployment seeded with an intentionally
-synthetic catalog.
+This repository contains the TanStack Start application. The linked development
+deployment intentionally uses a synthetic preview catalog; production launch is
+fail-closed until real entries have recorded owner consent and all synthetic records are
+absent.
 
 ## What is implemented
 
@@ -35,11 +36,24 @@ synthetic catalog.
   compatibility validation, complete exact-version receipt history, and scoped ranking
 - Append-only receipt supersession, maintainer-official designation, public disputes,
   private audit events, and an internal counter-reconciliation command
-- Unit, Convex authorization/data-boundary, security-boundary, and component tests
+- Shared protocol schemas, RFC 8785-compatible canonical JSON, Ed25519 signing and
+  verification, runner key registration/lifecycle, a reference CLI, and signed receipt
+  HTTP ingestion with replay, scope, size, and rate-limit enforcement
+- Reports, role-protected moderation, benchmark/receipt/runner status actions,
+  independent reproduction review, and public curator collections
+- Operator-controlled run requests with exact version/track/model binding, a narrow state
+  machine, leakage budgets, runner assignment, and signed-receipt completion
+- Public-image upload validation, save/receipt counter reconciliation, redacted
+  operational logs, CSP/security headers, health checks, and a production launch-content
+  gate
+- GitHub Actions CI, leak regression scanning, unit/Convex security tests, and Playwright
+  visitor, security-header, keyboard, and reduced-motion coverage
 
-The signed-runner workflow is not presented as complete. Managed WorkOS is configured for
-the linked development deployment, but browser GitHub login and the full publish/receipt
-journeys still need an end-to-end provider check. CI remains to be added.
+Current evidence and external gates are tracked in
+[docs/IMPLEMENTATION_STATUS.md](./docs/IMPLEMENTATION_STATUS.md). In particular, provider
+inspection on 2026-07-28 found the staging GitHub OAuth credential invalid and the
+production WorkOS application not yet configured. Real consented launch records also have
+not been supplied; the application does not substitute invented content.
 
 ## Local development
 
@@ -60,7 +74,9 @@ pnpm format:check   # Prettier verification
 pnpm lint           # ESLint
 pnpm typecheck      # strict TypeScript
 pnpm test           # Vitest
+pnpm test:e2e:smoke # Playwright browser/security smoke
 pnpm build          # production TanStack Start build
+pnpm leak:scan      # sealed-content sentinel scan
 pnpm check          # format, lint, typecheck, and tests
 ```
 
@@ -86,8 +102,8 @@ The seed mutation is internal-only, requires an explicit synthetic-data confirma
 is safe to rerun. TanStack Start routes render through Convex queries; the fixture module is
 only an input to tests and the development seed loader.
 
-If denormalized receipt counters ever drift during development, repair them with the
-internal-only reconciliation mutation:
+If denormalized receipt or save counters drift, repair them with the internal-only
+reconciliation mutations:
 
 ```bash
 pnpm convex:reconcile
@@ -128,12 +144,15 @@ not prove scientific truth.
 
 ## Deployment
 
-The scaffold uses Nitro's generic Node adapter:
+The application uses Nitro's Node adapter. Fly.io is the selected host; the committed
+container runs as a non-root user and `fly.toml` checks `/api/health`.
 
 ```bash
 pnpm build
 node .output/server/index.mjs
 ```
 
-Choose a concrete hosting target only after validating WorkOS callback behavior, Convex
-environment separation, security headers, and secret injection for that provider.
+See [docs/OPERATIONS.md](./docs/OPERATIONS.md) for environment isolation, deployment,
+backup/restore, rollback, monitoring, and incident procedures. Production must not be
+opened until WorkOS callback/logout/GitHub login, separate Convex production, and the
+real-content gate have all been verified.

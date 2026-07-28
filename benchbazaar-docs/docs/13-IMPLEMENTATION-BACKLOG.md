@@ -11,6 +11,41 @@ Status notation for the repository once implementation begins:
 [!] blocked
 ```
 
+## Current implementation snapshot (2026-07-28)
+
+The application checkout is the source of truth for code behavior; this snapshot repairs
+the backlog's former all-unmarked state without claiming provider or content evidence
+that does not exist.
+
+- `[x]` BB-001–BB-002 and BB-005–BB-023: repository, Convex, quality, public catalog,
+  accessibility shell, exact-version pages, receipts, and social routes are implemented.
+- `[~]` BB-003–BB-004: AuthKit middleware and the Convex identity bridge are implemented
+  and tested at their code boundaries. Live GitHub callback/logout evidence is blocked by
+  the provider state below.
+- `[x]` BB-025–BB-043: profiles, drafts, immutable publishing, baskets, manual receipts,
+  compatibility, supersession, disputes, official designation, and reconciliation are
+  implemented with authorization tests.
+- `[x]` BB-044–BB-051: protocol schemas, canonical JSON, Ed25519, runner CLI,
+  registration, signed ingestion, replay, suspension/revocation, and precise receipt UI
+  are implemented and tested.
+- `[x]` BB-052–BB-058: reports, moderation queue/actions, reproduction review, runner
+  moderation, and curator collections are implemented and tested.
+- `[x]` BB-059–BB-062: run-request state, UI, owner/runner actions, exact receipt closure,
+  and leakage budgets are implemented and tested.
+- `[x]` BB-063, BB-066, and BB-068: redacted operational logs, receipt/save
+  reconciliation, and production-output leak scanning are implemented and green.
+- `[~]` BB-064–BB-065 and BB-067–BB-069: security headers, public-image validation,
+  backup/rollback runbooks, CI, and browser journeys are implemented. A real authenticated
+  staging upload/auth/publisher/receipt/moderator journey and isolated restore rehearsal
+  remain controlled-environment gates.
+- `[!]` BB-070: production rejects synthetic or unconsented content, but no real
+  consented launch package has been supplied and the repository must not invent one.
+
+Provider inspection on 2026-07-28 found the BenchBazaar staging GitHub OAuth credential
+in an invalid state. The separate production WorkOS environment exists but has no GitHub
+credential, redirect URI, logout URI, web origin, or API key configured. Those facts keep
+BB-003/BB-004 and BB-069 blocked from a live completion claim.
+
 ## Epic A — Repository foundation
 
 ### BB-001 Initialize TanStack Start application
