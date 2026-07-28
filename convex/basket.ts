@@ -1,8 +1,13 @@
 import { ConvexError, v } from 'convex/values'
 
 import type { QueryCtx } from './_generated/server'
-import { mutation, query as defineQuery } from './_generated/server'
+import {
+  internalMutation,
+  mutation,
+  query as defineQuery,
+} from './_generated/server'
 import { requireUser } from './lib/authorization'
+import { reconcileBenchmarkSaveCounter } from './lib/save_counters'
 
 async function publishedBenchmarkBySlug(ctx: QueryCtx, slug: string) {
   const benchmark = await ctx.db
@@ -94,5 +99,19 @@ export const mine = defineQuery({
       }),
     )
     return items.filter((item) => item !== null)
+  },
+})
+
+export const reconcileCounters = internalMutation({
+  args: { confirm: v.literal(true) },
+  handler: async (ctx) => {
+    const benchmarks = await ctx.db.query('benchmarks').take(10_000)
+    let updated = 0
+    for (const benchmark of benchmarks) {
+      if (await reconcileBenchmarkSaveCounter(ctx, benchmark._id)) {
+        updated += 1
+      }
+    }
+    return { scanned: benchmarks.length, updated }
   },
 })

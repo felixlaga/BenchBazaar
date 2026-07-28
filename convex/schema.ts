@@ -351,6 +351,8 @@ export default defineSchema({
     supersedesReceiptId: v.optional(v.id('receipts')),
     disputeSummary: v.optional(v.string()),
     moderationReason: v.optional(v.string()),
+    runnerKeyId: v.optional(v.id('runnerKeys')),
+    signature: v.optional(v.string()),
     signatureFingerprint: v.optional(v.string()),
     signatureValid: v.boolean(),
     synthetic: v.boolean(),
@@ -365,6 +367,7 @@ export default defineSchema({
     .index('by_modelId_completedAt', ['modelId', 'completedAt'])
     .index('by_benchmarkId', ['benchmarkId'])
     .index('by_supersedesReceiptId', ['supersedesReceiptId'])
+    .index('by_runnerKeyId_submittedAt', ['runnerKeyId', 'submittedAt'])
     .index('by_status_submittedAt', ['status', 'submittedAt'])
     .index('by_submittedByUserId_submittedAt', [
       'submittedByUserId',
@@ -388,6 +391,194 @@ export default defineSchema({
     .index('by_openedByUserId_createdAt', ['openedByUserId', 'createdAt'])
     .index('by_status_createdAt', ['status', 'createdAt']),
 
+  runnerKeys: defineTable({
+    publicId: v.string(),
+    ownerId: v.id('users'),
+    label: v.string(),
+    publicKeySpki: v.string(),
+    fingerprint: v.string(),
+    scope: v.union(v.literal('all_owner_benchmarks'), v.literal('benchmark')),
+    benchmarkId: v.optional(v.id('benchmarks')),
+    status: v.union(
+      v.literal('active'),
+      v.literal('suspended'),
+      v.literal('revoked'),
+    ),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+    revokedAt: v.optional(v.number()),
+  })
+    .index('by_publicId', ['publicId'])
+    .index('by_fingerprint', ['fingerprint'])
+    .index('by_ownerId_createdAt', ['ownerId', 'createdAt'])
+    .index('by_status', ['status']),
+
+  receiptNonces: defineTable({
+    runnerKeyId: v.id('runnerKeys'),
+    nonce: v.string(),
+    receiptPublicId: v.string(),
+    createdAt: v.number(),
+  })
+    .index('by_runnerKeyId_nonce', ['runnerKeyId', 'nonce'])
+    .index('by_receiptPublicId', ['receiptPublicId']),
+
+  reports: defineTable({
+    reporterId: v.id('users'),
+    targetType: v.union(v.literal('benchmark'), v.literal('receipt')),
+    benchmarkId: v.optional(v.id('benchmarks')),
+    receiptId: v.optional(v.id('receipts')),
+    category: v.union(
+      v.literal('spam'),
+      v.literal('unsafe_content'),
+      v.literal('misleading_claim'),
+      v.literal('provenance'),
+      v.literal('other'),
+    ),
+    details: v.string(),
+    status: v.union(
+      v.literal('open'),
+      v.literal('reviewing'),
+      v.literal('resolved'),
+      v.literal('dismissed'),
+    ),
+    assignedToUserId: v.optional(v.id('users')),
+    resolution: v.optional(v.string()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index('by_status_createdAt', ['status', 'createdAt'])
+    .index('by_reporterId_createdAt', ['reporterId', 'createdAt'])
+    .index('by_benchmarkId_createdAt', ['benchmarkId', 'createdAt'])
+    .index('by_receiptId_createdAt', ['receiptId', 'createdAt']),
+
+  reproductionReviews: defineTable({
+    candidateReceiptId: v.id('receipts'),
+    supportingReceiptId: v.id('receipts'),
+    requestedByUserId: v.id('users'),
+    tolerance: v.number(),
+    status: v.union(
+      v.literal('pending'),
+      v.literal('accepted'),
+      v.literal('rejected'),
+    ),
+    decidedByUserId: v.optional(v.id('users')),
+    reason: v.optional(v.string()),
+    createdAt: v.number(),
+    decidedAt: v.optional(v.number()),
+  })
+    .index('by_status_createdAt', ['status', 'createdAt'])
+    .index('by_candidateReceiptId', ['candidateReceiptId'])
+    .index('by_supportingReceiptId', ['supportingReceiptId']),
+
+  curatorCollections: defineTable({
+    ownerId: v.id('users'),
+    slug: v.string(),
+    title: v.string(),
+    description: v.string(),
+    status: v.union(v.literal('draft'), v.literal('published')),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index('by_slug', ['slug'])
+    .index('by_ownerId_updatedAt', ['ownerId', 'updatedAt'])
+    .index('by_status_updatedAt', ['status', 'updatedAt']),
+
+  curatorCollectionEntries: defineTable({
+    collectionId: v.id('curatorCollections'),
+    benchmarkId: v.id('benchmarks'),
+    position: v.number(),
+    note: v.optional(v.string()),
+    createdAt: v.number(),
+  })
+    .index('by_collectionId_position', ['collectionId', 'position'])
+    .index('by_collectionId_benchmarkId', ['collectionId', 'benchmarkId']),
+
+  runRequests: defineTable({
+    publicId: v.string(),
+    requesterId: v.id('users'),
+    benchmarkId: v.id('benchmarks'),
+    benchmarkVersionId: v.id('benchmarkVersions'),
+    trackId: v.string(),
+    requestedModelId: v.string(),
+    endpointUrl: v.optional(v.string()),
+    endpointExposureAcknowledged: v.boolean(),
+    status: v.union(
+      v.literal('requested'),
+      v.literal('approved'),
+      v.literal('declined'),
+      v.literal('assigned'),
+      v.literal('running'),
+      v.literal('succeeded'),
+      v.literal('failed'),
+      v.literal('cancelled'),
+    ),
+    assignedRunnerKeyId: v.optional(v.id('runnerKeys')),
+    receiptId: v.optional(v.id('receipts')),
+    ownerNote: v.optional(v.string()),
+    errorCode: v.optional(v.string()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index('by_publicId', ['publicId'])
+    .index('by_requesterId_createdAt', ['requesterId', 'createdAt'])
+    .index('by_benchmarkId_createdAt', ['benchmarkId', 'createdAt'])
+    .index('by_status_createdAt', ['status', 'createdAt'])
+    .index('by_assignedRunnerKeyId_updatedAt', [
+      'assignedRunnerKeyId',
+      'updatedAt',
+    ]),
+
+  rateLimits: defineTable({
+    key: v.string(),
+    operation: v.string(),
+    windowStart: v.number(),
+    count: v.number(),
+    updatedAt: v.number(),
+  }).index('by_key_operation_windowStart', ['key', 'operation', 'windowStart']),
+
+  receiptIngestionAttempts: defineTable({
+    requestId: v.string(),
+    runnerPublicId: v.optional(v.string()),
+    receiptPublicId: v.optional(v.string()),
+    outcome: v.union(v.literal('accepted'), v.literal('rejected')),
+    errorCode: v.optional(v.string()),
+    durationMs: v.number(),
+    createdAt: v.number(),
+  })
+    .index('by_requestId', ['requestId'])
+    .index('by_createdAt', ['createdAt']),
+
+  uploadIntents: defineTable({
+    ownerId: v.id('users'),
+    storageId: v.optional(v.id('_storage')),
+    kind: v.literal('public_benchmark_image'),
+    status: v.union(
+      v.literal('pending'),
+      v.literal('accepted'),
+      v.literal('rejected'),
+    ),
+    rejectionCode: v.optional(v.string()),
+    createdAt: v.number(),
+    finalizedAt: v.optional(v.number()),
+  })
+    .index('by_ownerId_createdAt', ['ownerId', 'createdAt'])
+    .index('by_status_createdAt', ['status', 'createdAt']),
+
+  launchContentConsents: defineTable({
+    benchmarkId: v.id('benchmarks'),
+    ownerId: v.id('users'),
+    recordedByUserId: v.id('users'),
+    source: v.union(
+      v.literal('owner_submission'),
+      v.literal('written_release'),
+    ),
+    statement: v.string(),
+    evidenceUrl: v.optional(v.string()),
+    recordedAt: v.number(),
+  })
+    .index('by_benchmarkId', ['benchmarkId'])
+    .index('by_ownerId_recordedAt', ['ownerId', 'recordedAt']),
+
   basketSaves: defineTable({
     userId: v.id('users'),
     benchmarkId: v.id('benchmarks'),
@@ -403,6 +594,8 @@ export default defineSchema({
     targetType: v.string(),
     targetId: v.string(),
     publicSummary: v.optional(v.string()),
+    requestId: v.optional(v.string()),
+    safeErrorCode: v.optional(v.string()),
     createdAt: v.number(),
   })
     .index('by_actorId_createdAt', ['actorId', 'createdAt'])

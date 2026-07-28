@@ -155,12 +155,16 @@ async function toBenchmarkSummary(
   if (!owner || !aisle || !benchmark.currentVersion) {
     throw new ConvexError({ code: 'INVALID_PUBLIC_BENCHMARK' })
   }
+  const coverImageUrl = benchmark.coverImageStorageId
+    ? await ctx.storage.getUrl(benchmark.coverImageStorageId)
+    : null
 
   return {
     id: benchmark.publicRef,
     slug: benchmark.slug,
     title: benchmark.title,
     summary: benchmark.summary,
+    ...(coverImageUrl ? { coverImageUrl } : {}),
     aisle,
     vendor: { handle: owner.handle, displayName: owner.displayName },
     version: benchmark.currentVersion,
