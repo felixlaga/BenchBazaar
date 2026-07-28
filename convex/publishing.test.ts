@@ -199,6 +199,31 @@ describe('authenticated publishing', () => {
     ])
   })
 
+  it('autosaves incomplete optional URLs but rejects them at publish time', async () => {
+    const t = convexTest(schema, modules)
+    const owner = await setupMember(t, 'workos_url_editor', 'url-editor')
+    const created = await owner.mutation(api.drafts.create, {})
+    const incompleteDraft = {
+      ...validDraft,
+      repositoryUrl: 'https://',
+      writeupUrl: 'github.com/url-editor/writeup',
+    }
+
+    await expect(
+      owner.mutation(api.drafts.save, {
+        draftId: created.draftId,
+        draft: incompleteDraft,
+        samples: validSamples,
+      }),
+    ).resolves.toMatchObject({ updatedAt: expect.any(Number) })
+    await expect(
+      owner.mutation(api.drafts.publish, {
+        draftId: created.draftId,
+        confirmations,
+      }),
+    ).rejects.toThrow('INVALID_REPOSITORY_URL')
+  })
+
   it('normalizes public profiles and rejects handle collisions atomically', async () => {
     const t = convexTest(schema, modules)
     await setupMember(t, 'workos_first', 'shared-handle')

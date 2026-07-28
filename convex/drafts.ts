@@ -406,8 +406,12 @@ export const save = mutation({
       throw new ConvexError({ code: 'TOO_MANY_PUBLIC_SAMPLES' })
     }
     validateTracks(args.draft.tracks)
-    validateSafeUrl(args.draft.repositoryUrl, 'INVALID_REPOSITORY_URL')
-    validateSafeUrl(args.draft.writeupUrl, 'INVALID_WRITEUP_URL')
+    if (
+      (args.draft.repositoryUrl?.length ?? 0) > 2_000 ||
+      (args.draft.writeupUrl?.length ?? 0) > 2_000
+    ) {
+      throw new ConvexError({ code: 'DRAFT_FIELD_TOO_LONG' })
+    }
 
     const sampleIds = new Set<string>()
     for (const sample of args.samples) {
