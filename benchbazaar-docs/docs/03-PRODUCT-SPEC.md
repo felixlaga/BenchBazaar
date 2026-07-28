@@ -391,74 +391,33 @@ Use one page with sections and a persistent live preview rather than a long mult
 ### Section A: Listing
 
 - title;
-- slug preview;
-- one-line premise;
-- aisle;
-- tags;
-- modality;
-- optional illustration.
+- automatic slug preview;
+- short card description of two or three sentences.
 
-### Section B: Purpose
+### Section B: Full explanation
 
-- capability tested;
-- why it matters;
-- intended use;
-- claims the benchmark supports;
-- claims it does not support.
+One long-form explanation of what the benchmark does, how it works, and what a result
+means.
 
 ### Section C: Free samples
 
-- minimum three;
-- stable sample IDs;
+- exactly three;
+- automatically generated stable sample IDs;
 - input and answer/rubric;
 - explicit confirmation that these samples are public and excluded from official scoring.
 
-### Section D: Scoring and tracks
+### Section D: Public repository
 
-For each track:
+An optional HTTPS GitHub repository URL when the implementation is public.
 
-- ID and display name;
-- prompting rules;
-- tools allowed;
-- retry policy;
-- primary metric;
-- metric direction;
-- scorer type and version;
-- judge model and public judge rubric when applicable.
+### Section E: System-owned defaults
 
-### Section E: Sealed-set setup
+The application owns the initial version, slug, benchmark ID, sample IDs, initial
+changelog, and default single-track evaluation metadata. Runner and advanced evaluation
+configuration does not burden the initial listing form. Never ask authors to paste hidden
+items into ordinary text fields.
 
-Choose one:
-
-- author-operated runner;
-- manual signed receipt workflow;
-- no official sealed runs yet;
-- managed encrypted storage later.
-
-Capture:
-
-- item-count disclosure or range;
-- dataset/generator digest;
-- rotation policy;
-- endpoint visibility warning;
-- public contamination statement.
-
-Never ask authors to paste hidden items into ordinary text fields.
-
-### Section F: Source and licensing
-
-- repository;
-- write-up or paper;
-- public method license;
-- public sample license;
-- hidden data rights confirmation;
-- maintainer identity.
-
-### Section G: Limitations
-
-Require at least one limitation statement before publishing.
-
-### Section H: Preview and publish
+### Section F: Preview and publish
 
 - preview benchmark card and page header;
 - validate required fields;

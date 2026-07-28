@@ -323,13 +323,13 @@ Short, distinctive titles are easiest to remember and share.
 ### Summary
 
 ```text
-Describe the test in one sentence a developer can understand.
+Describe the benchmark in two or three sentences for its listing card.
 ```
 
-### Purpose
+### Full explanation
 
 ```text
-What capability is this trying to isolate, and why would anyone care?
+Explain what the benchmark does, how it works, and what a result means.
 ```
 
 ### Public samples
@@ -339,34 +339,10 @@ Everything in this section may be published and indexed.
 Use display examples only. Never paste official hidden questions or answers here.
 ```
 
-### Supported claims
+### Public GitHub repository
 
 ```text
-What can a good score reasonably suggest?
-```
-
-### Unsupported claims
-
-```text
-What would be an overinterpretation of this benchmark?
-```
-
-### Limitations
-
-```text
-Every benchmark has blind spots. Naming them makes the result more useful, not less impressive.
-```
-
-### Sealed-set digest
-
-```text
-A digest binds receipts to one exact private set or generator version without revealing its contents.
-```
-
-### Endpoint exposure
-
-```text
-A controlled runner keeps prompts off the public website. A remote model service can still see requests sent to it.
+Optional. Link the public implementation when it is hosted on GitHub.
 ```
 
 ## 12. Publish confirmation

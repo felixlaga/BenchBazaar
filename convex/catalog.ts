@@ -350,6 +350,7 @@ async function toBenchmarkDetail(
     purpose: version.capabilityStatement,
     method: version.methodMarkdown,
     limitations: markdownList(version.limitationsMarkdown),
+    ...(version.repositoryUrl ? { repositoryUrl: version.repositoryUrl } : {}),
     samples: samples.map((sample) => ({
       id: sample.publicSampleId,
       input: sample.inputMarkdown,
@@ -364,9 +365,11 @@ async function toBenchmarkDetail(
       ),
     ),
     sealedSet: {
-      mode: 'author_managed',
+      mode: version.sealedPolicy.mode === 'none' ? 'public' : 'author_managed',
       statement:
-        'The official scored questions are kept by the benchmark author and are not publicly downloadable.',
+        version.sealedPolicy.mode === 'none'
+          ? 'This benchmark declares no sealed scored set.'
+          : 'The official scored questions are kept by the benchmark author and are not publicly downloadable.',
       endpointExposure: version.sealedPolicy.endpointExposureNote,
     },
     versions: versionHistory.flatMap((candidate) => {

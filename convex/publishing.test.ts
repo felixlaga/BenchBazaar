@@ -28,10 +28,9 @@ const validDraft = {
     'The score does not establish general truthfulness or factual reliability.',
   methodMarkdown:
     'Each item contains one declared premise. The model must classify it and briefly explain any defect.',
-  limitationsMarkdown:
-    '- The synthetic prompts cover a narrow set of English-language premise failures.',
+  limitationsMarkdown: '',
   license: 'CC-BY-4.0',
-  repositoryUrl: 'https://example.com/tiny-reality-check',
+  repositoryUrl: 'https://github.com/example/tiny-reality-check',
   sealedPolicy: {
     mode: 'author_runner' as const,
     itemCount: 30,
@@ -222,6 +221,96 @@ describe('authenticated publishing', () => {
         confirmations,
       }),
     ).rejects.toThrow('INVALID_REPOSITORY_URL')
+    await owner.mutation(api.drafts.save, {
+      draftId: created.draftId,
+      draft: {
+        ...validDraft,
+        repositoryUrl: 'https://example.com/not-a-github-repository',
+      },
+      samples: validSamples,
+    })
+    await expect(
+      owner.mutation(api.drafts.publish, {
+        draftId: created.draftId,
+        confirmations,
+      }),
+    ).rejects.toThrow('INVALID_REPOSITORY_URL')
+    const { repositoryUrl: _repositoryUrl, ...draftWithoutRepository } =
+      validDraft
+    await owner.mutation(api.drafts.save, {
+      draftId: created.draftId,
+      draft: draftWithoutRepository,
+      samples: validSamples,
+    })
+    await expect(
+      owner.query(api.drafts.get, { draftId: created.draftId }),
+    ).resolves.not.toHaveProperty('repositoryUrl')
+  })
+
+  it('derives the public slug from the title instead of trusting draft input', async () => {
+    const t = convexTest(schema, modules)
+    const owner = await setupMember(t, 'workos_slug_editor', 'slug-editor')
+    const created = await owner.mutation(api.drafts.create, {})
+
+    await expect(
+      owner.mutation(api.drafts.save, {
+        draftId: created.draftId,
+        draft: validDraft,
+        samples: validSamples.slice(0, 2),
+      }),
+    ).rejects.toThrow('PUBLIC_SAMPLE_COUNT_INVALID')
+    await expect(
+      owner.mutation(api.drafts.save, {
+        draftId: created.draftId,
+        draft: {
+          ...validDraft,
+          proposedVersion: '99.0.0',
+          slug: 'browser-supplied-slug',
+          supportedClaims: '',
+          unsupportedClaims: '',
+          sealedPolicy: {
+            mode: 'none',
+            endpointExposureNote:
+              'This public benchmark has no sealed scored material.',
+          },
+          tracks: [
+            {
+              ...validDraft.tracks[0],
+              id: 'browser-track',
+              label: 'Browser-supplied track',
+            },
+          ],
+        },
+        samples: validSamples.map((sample) => ({
+          ...sample,
+          publicSampleId: 'browser-supplied-id',
+          confirmedDisplayOnly: false,
+        })),
+      }),
+    ).resolves.toMatchObject({ slug: 'tiny-reality-check' })
+    const published = await owner.mutation(api.drafts.publish, {
+      draftId: created.draftId,
+      confirmations,
+    })
+    expect(published).toMatchObject({
+      slug: 'tiny-reality-check',
+      version: '1.0.0',
+    })
+
+    const publicPage = await t.query(api.catalog.benchmarkBySlug, {
+      slug: 'tiny-reality-check',
+    })
+    expect(publicPage?.benchmark).toMatchObject({
+      repositoryUrl: validDraft.repositoryUrl,
+      limitations: [],
+      sealedSet: { mode: 'public' },
+      samples: [
+        { id: 'sample-1', includedInOfficialScore: false },
+        { id: 'sample-2', includedInOfficialScore: false },
+        { id: 'sample-3', includedInOfficialScore: false },
+      ],
+      tracks: [{ id: 'standard' }],
+    })
   })
 
   it('normalizes public profiles and rejects handle collisions atomically', async () => {

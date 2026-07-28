@@ -81,10 +81,10 @@ Community members can publish immutable benchmark versions.
 - benchmark stable identity
 - mutable drafts
 - autosave
-- public sample editor
-- track/scoring editor
-- sealed-set policy editor
-- limitations and source fields
+- focused title, card-description, and full-explanation editor
+- exactly three public samples with automatic IDs
+- optional public GitHub repository
+- automatic slug, version, changelog, and default evaluation metadata
 - live card preview
 - publish validation
 - immutable version snapshot

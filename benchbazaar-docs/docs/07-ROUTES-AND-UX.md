@@ -280,14 +280,14 @@ Edit an unpublished draft or create a successor draft from the current version.
 
 Sections:
 
-1. Listing
-2. Purpose
-3. Free samples
-4. Tracks and scoring
-5. Sealed-set policy
-6. Source and licensing
-7. Limitations
-8. Preview and publish
+1. Title, short card description, and full explanation
+2. Exactly three public samples
+3. Optional public GitHub repository
+4. Review and publish
+
+The application generates the slug, version, sample IDs, initial changelog, and default
+evaluation metadata. Advanced track and runner administration is separate from the
+contributor-facing publishing form.
 
 ### Publish confirmation
 

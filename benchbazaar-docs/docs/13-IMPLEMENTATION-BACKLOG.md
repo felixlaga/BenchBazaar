@@ -239,33 +239,34 @@ BB-003/BB-004 and BB-069 blocked from a live completion claim.
 
 ### BB-031 Build listing and purpose editor
 
-- Title, slug, summary, aisle, tags, capability fields.
+- Title, two-or-three-sentence card description, and full explanation.
+- Generate the slug from the title.
 - Live card preview.
 - Acceptance: validation and responsive editor.
 
 ### BB-032 Build public sample editor
 
-- Add/reorder/delete samples.
-- Display-only confirmation.
+- Exactly three samples with automatic stable IDs.
+- One global public/display-only confirmation.
 - Hidden-data warning.
-- Acceptance: minimum sample rule and stable IDs.
+- Acceptance: three complete samples and stable system-owned IDs.
 
 ### BB-033 Build track and scoring editor
 
-- Track IDs, prompt/tool/retry policy, scorer, metric direction.
-- Acceptance: duplicate IDs rejected.
+- Keep the initial single-track contract as a system-owned default.
+- Move custom track/scoring administration out of initial publishing.
+- Acceptance: exact compatibility metadata still exists without manual contributor input.
 
 ### BB-034 Build sealed policy editor
 
-- Mode, digest, item-count disclosure, rotation, endpoint caveat.
-- No hidden data fields.
-- Acceptance: form cannot upload/paste full set.
+- Default new listings to public/no-sealed-set.
+- Configure runners and sealed policies through their dedicated workflows.
+- Acceptance: the initial form has no hidden-content ingress.
 
-### BB-035 Build source, license, and limitations editor
+### BB-035 Add optional public repository
 
-- Require limitation.
-- Validate safe URLs.
-- Acceptance: unsafe schemes rejected.
+- Accept an optional HTTPS GitHub repository URL.
+- Acceptance: other hosts and unsafe schemes are rejected at publish time.
 
 ### BB-036 Implement publish mutation
 

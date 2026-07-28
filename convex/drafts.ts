@@ -129,6 +129,22 @@ function validateSafeUrl(value: string | undefined, code: string) {
   }
 }
 
+function validateGitHubRepositoryUrl(value: string | undefined) {
+  if (!value) return
+  validateSafeUrl(value, 'INVALID_REPOSITORY_URL')
+  const url = new URL(value)
+  const pathSegments = url.pathname.split('/').filter(Boolean)
+  if (
+    url.protocol !== 'https:' ||
+    url.hostname.toLowerCase() !== 'github.com' ||
+    url.username ||
+    url.password ||
+    pathSegments.length < 2
+  ) {
+    throw new ConvexError({ code: 'INVALID_REPOSITORY_URL' })
+  }
+}
+
 function assertLength(
   value: string,
   minimum: number,
@@ -247,7 +263,7 @@ export const create = mutation({
       methodMarkdown: '',
       limitationsMarkdown: '',
       sealedPolicy: {
-        mode: 'author_runner',
+        mode: 'none',
         endpointExposureNote: defaultEndpointNote,
       },
       tracks: [defaultTrack],
@@ -393,32 +409,19 @@ export const save = mutation({
     if (draft.status === 'published' || draft.status === 'publishing') {
       throw new ConvexError({ code: 'DRAFT_NOT_EDITABLE' })
     }
-    if (args.draft.slug && normalizeSlug(args.draft.slug) !== args.draft.slug) {
-      throw new ConvexError({ code: 'INVALID_SLUG' })
-    }
-    if (args.draft.title.length > 100 || args.draft.summary.length > 220) {
+    if (args.draft.title.length > 100 || args.draft.summary.length > 500) {
       throw new ConvexError({ code: 'DRAFT_FIELD_TOO_LONG' })
     }
-    if (args.draft.tags.length > 12 || args.draft.modalities.length > 4) {
-      throw new ConvexError({ code: 'DRAFT_LIST_TOO_LONG' })
+    if (args.samples.length !== 3) {
+      throw new ConvexError({ code: 'PUBLIC_SAMPLE_COUNT_INVALID' })
     }
-    if (args.samples.length > 10) {
-      throw new ConvexError({ code: 'TOO_MANY_PUBLIC_SAMPLES' })
-    }
-    validateTracks(args.draft.tracks)
-    if (
-      (args.draft.repositoryUrl?.length ?? 0) > 2_000 ||
-      (args.draft.writeupUrl?.length ?? 0) > 2_000
-    ) {
+    if ((args.draft.repositoryUrl?.length ?? 0) > 2_000) {
       throw new ConvexError({ code: 'DRAFT_FIELD_TOO_LONG' })
     }
 
     const sampleIds = new Set<string>()
-    for (const sample of args.samples) {
-      const id = normalizeIdentifier(sample.publicSampleId)
-      if (!id || id !== sample.publicSampleId || sampleIds.has(id)) {
-        throw new ConvexError({ code: 'INVALID_OR_DUPLICATE_SAMPLE_ID' })
-      }
+    for (const [position, sample] of args.samples.entries()) {
+      const id = `sample-${position + 1}`
       sampleIds.add(id)
       if (
         sample.inputMarkdown.length > 4_000 ||
@@ -429,9 +432,54 @@ export const save = mutation({
       }
     }
 
+    let slug = draft.baseVersionId
+      ? draft.slug
+      : normalizeSlug(args.draft.title)
+    const slugSuffix =
+      normalizeSlug(String(draft.benchmarkId)).slice(-8) || 'benchmark'
+    if (!slug && args.draft.title.trim()) slug = `benchmark-${slugSuffix}`
+    if (slug) {
+      const collision = await ctx.db
+        .query('benchmarks')
+        .withIndex('by_slug', (query) => query.eq('slug', slug))
+        .unique()
+      if (collision && collision._id !== draft.benchmarkId) {
+        slug = `${slug.slice(
+          0,
+          Math.max(3, 79 - slugSuffix.length),
+        )}-${slugSuffix}`
+      }
+    }
+
     const now = Date.now()
     await ctx.db.patch(draft._id, {
-      ...args.draft,
+      proposedVersion: draft.proposedVersion,
+      slug,
+      title: args.draft.title,
+      summary: args.draft.summary,
+      aisle: draft.aisle,
+      tags: draft.tags,
+      modalities: draft.modalities,
+      capabilityStatement: args.draft.summary,
+      whyItMatters: draft.whyItMatters,
+      intendedUse: draft.intendedUse,
+      supportedClaims: draft.supportedClaims,
+      unsupportedClaims: draft.unsupportedClaims,
+      methodMarkdown: args.draft.methodMarkdown,
+      limitationsMarkdown: '',
+      license: draft.license,
+      repositoryUrl: args.draft.repositoryUrl?.trim() || undefined,
+      writeupUrl: draft.writeupUrl,
+      sealedPolicy: draft.baseVersionId
+        ? draft.sealedPolicy
+        : {
+            mode: 'none',
+            endpointExposureNote: defaultEndpointNote,
+          },
+      tracks: draft.baseVersionId ? draft.tracks : [defaultTrack],
+      changelogMarkdown:
+        draft.changelogMarkdown.trim() ||
+        (draft.baseVersionId ? 'Updated version.' : 'Initial version.'),
       status: 'editing',
       updatedAt: now,
     })
@@ -448,15 +496,16 @@ export const save = mutation({
       if (!sampleIds.has(sample.publicSampleId)) await ctx.db.delete(sample._id)
     }
     for (const [position, sample] of args.samples.entries()) {
-      const current = existingById.get(sample.publicSampleId)
+      const publicSampleId = `sample-${position + 1}`
+      const current = existingById.get(publicSampleId)
       const values = {
         ownerId: user._id,
-        publicSampleId: sample.publicSampleId,
+        publicSampleId,
         position,
         inputMarkdown: sample.inputMarkdown,
         expectedMarkdown: sample.expectedMarkdown,
         explanationMarkdown: sample.explanationMarkdown,
-        confirmedDisplayOnly: sample.confirmedDisplayOnly,
+        confirmedDisplayOnly: true,
         updatedAt: now,
       }
       if (current) {
@@ -465,7 +514,7 @@ export const save = mutation({
         await ctx.db.insert('draftSamples', {
           draftId: draft._id,
           ownerId: user._id,
-          publicSampleId: sample.publicSampleId,
+          publicSampleId,
           position,
           inputMarkdown: sample.inputMarkdown,
           ...(sample.expectedMarkdown
@@ -474,13 +523,13 @@ export const save = mutation({
           ...(sample.explanationMarkdown
             ? { explanationMarkdown: sample.explanationMarkdown }
             : {}),
-          confirmedDisplayOnly: sample.confirmedDisplayOnly,
+          confirmedDisplayOnly: true,
           createdAt: now,
           updatedAt: now,
         })
       }
     }
-    return { updatedAt: now }
+    return { slug, updatedAt: now }
   },
 })
 
@@ -631,7 +680,7 @@ export const publish = mutation({
       throw new ConvexError({ code: 'INVALID_SEMVER' })
     }
     assertLength(draft.title, 3, 100, 'TITLE_REQUIRED')
-    assertLength(draft.summary, 20, 220, 'SUMMARY_REQUIRED')
+    assertLength(draft.summary, 20, 500, 'SUMMARY_REQUIRED')
     assertLength(
       draft.capabilityStatement,
       20,
@@ -639,17 +688,9 @@ export const publish = mutation({
       'CAPABILITY_STATEMENT_REQUIRED',
     )
     assertLength(draft.methodMarkdown, 30, 8_000, 'METHOD_REQUIRED')
-    assertLength(draft.limitationsMarkdown, 10, 5_000, 'LIMITATION_REQUIRED')
-    assertLength(draft.supportedClaims, 10, 2_000, 'SUPPORTED_CLAIMS_REQUIRED')
-    assertLength(
-      draft.unsupportedClaims,
-      10,
-      2_000,
-      'UNSUPPORTED_CLAIMS_REQUIRED',
-    )
     assertLength(draft.changelogMarkdown, 3, 2_000, 'CHANGELOG_REQUIRED')
     validateTracks(draft.tracks)
-    validateSafeUrl(draft.repositoryUrl, 'INVALID_REPOSITORY_URL')
+    validateGitHubRepositoryUrl(draft.repositoryUrl)
     validateSafeUrl(draft.writeupUrl, 'INVALID_WRITEUP_URL')
     if (
       draft.sealedPolicy.mode !== 'none' &&

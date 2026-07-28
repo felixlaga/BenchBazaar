@@ -74,10 +74,11 @@ export type BenchmarkDetail = BenchmarkSummary & {
   purpose: string
   method: string
   limitations: Array<string>
+  repositoryUrl?: string
   samples: Array<PublicSample>
   tracks: Array<Track>
   sealedSet: {
-    mode: 'author_managed'
+    mode: 'public' | 'author_managed'
     statement: string
     endpointExposure: string
   }

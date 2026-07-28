@@ -3,8 +3,9 @@
 > **Odd tests. Useful signals.**
 
 BenchBazaar is an open registry for community-made LLM benchmarks. Authors publish a
-benchmark's purpose, public examples, scorer, limitations, and versioned result receipts
-while keeping the official scored items outside the public web application.
+title, a short card description, a full explanation, three public examples, an optional
+GitHub repository, and versioned result receipts while keeping official scored items
+outside the public web application.
 
 This repository contains the TanStack Start application. The linked development
 deployment intentionally uses a synthetic preview catalog; production launch is
@@ -27,9 +28,9 @@ absent.
   with no sealed-content fields
 - WorkOS AuthKit login/logout UI, token forwarding to Convex on server and client, and
   first-access user synchronization keyed by validated token subject
-- Protected profile setup, owner dashboard, mutable benchmark drafts with visible
-  autosave, public-sample and multi-track editors, and an atomic immutable publish
-  transaction
+- Protected profile setup, owner dashboard, a focused autosaving benchmark editor with
+  automatic identifiers and system-owned evaluation defaults, and an atomic immutable
+  publish transaction
 - Successor-version drafts, authenticated basket saves, centralized ownership checks,
   and private publish audit events
 - Canonical model resolution, manual and artifact-linked receipt submission, persisted

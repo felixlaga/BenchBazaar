@@ -46,9 +46,12 @@ The MVP is complete only when all required criteria below pass. “Looks good in
 - [ ] A signed-in user can create a benchmark draft.
 - [ ] Only the owner can read or edit the draft.
 - [ ] Draft autosave has visible success/error state.
-- [ ] Public samples have stable IDs and display-only confirmation.
+- [ ] The contributor supplies a title, short card description, full explanation, and
+      exactly three public samples.
+- [ ] Slugs, versions, and public sample IDs are generated automatically.
+- [ ] An optional repository URL must identify a valid public GitHub repository.
+- [ ] Public samples have display-only confirmation.
 - [ ] The form warns against pasting hidden test items.
-- [ ] At least one limitation is required.
 - [ ] At least one valid track and primary metric are required.
 - [ ] Publishing creates an immutable version snapshot.
 - [ ] A published version cannot be patched by client mutation.

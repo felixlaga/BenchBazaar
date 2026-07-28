@@ -6,7 +6,7 @@ cannot be inferred from code.
 
 ## Verified in this checkout
 
-- CI is configured to run formatting, linting, strict TypeScript, 46 unit/Convex tests,
+- CI is configured to run formatting, linting, strict TypeScript, 48 unit/Convex tests,
   production build, leak scanning, and selected Playwright smoke tests. The same commands
   pass locally; a GitHub-hosted run requires these uncommitted changes to be published.
 - The Playwright suite passes the public visitor journey through browse, an exact

@@ -144,7 +144,9 @@ export function BenchmarkPage({
           <a href="#scoreboard">Scoreboard</a>
           <a href="#receipts">All receipts</a>
           <a href="#method">Method</a>
-          <a href="#limitations">Limitations</a>
+          {benchmark.limitations.length > 0 && (
+            <a href="#limitations">Limitations</a>
+          )}
           <a href="#versions">Versions</a>
         </nav>
 
@@ -166,10 +168,12 @@ export function BenchmarkPage({
             the current version.
           </StatusBanner>
         )}
-        <StatusBanner variant="warning" title="Sealed set">
-          <p>{benchmark.sealedSet.statement}</p>
-          <p>{benchmark.sealedSet.endpointExposure}</p>
-        </StatusBanner>
+        {benchmark.sealedSet.mode === 'author_managed' && (
+          <StatusBanner variant="warning" title="Sealed set">
+            <p>{benchmark.sealedSet.statement}</p>
+            <p>{benchmark.sealedSet.endpointExposure}</p>
+          </StatusBanner>
+        )}
 
         <section className="content-section" id="samples">
           <SectionHeading
@@ -280,7 +284,7 @@ export function BenchmarkPage({
         <section className="content-section method-grid" id="method">
           <div>
             <p className="eyebrow">What it tests</p>
-            <h2>{benchmark.purpose}</h2>
+            <h2>What this benchmark does</h2>
           </div>
           <div className="method-card">
             <BookOpenText aria-hidden="true" size={26} />
@@ -308,19 +312,21 @@ export function BenchmarkPage({
           </div>
         </section>
 
-        <section className="content-section limitations" id="limitations">
-          <div>
-            <p className="eyebrow">Fine print</p>
-            <h2>What this score does not prove</h2>
-          </div>
-          <ul>
-            {benchmark.limitations.map((limitation) => (
-              <li key={limitation}>
-                <Check aria-hidden="true" size={17} /> {limitation}
-              </li>
-            ))}
-          </ul>
-        </section>
+        {benchmark.limitations.length > 0 && (
+          <section className="content-section limitations" id="limitations">
+            <div>
+              <p className="eyebrow">Fine print</p>
+              <h2>What this score does not prove</h2>
+            </div>
+            <ul>
+              {benchmark.limitations.map((limitation) => (
+                <li key={limitation}>
+                  <Check aria-hidden="true" size={17} /> {limitation}
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
 
         <section className="content-section" id="versions">
           <SectionHeading
@@ -357,26 +363,27 @@ export function BenchmarkPage({
           </div>
         </section>
 
-        <section className="source-card">
-          <Box aria-hidden="true" size={24} />
-          <div>
-            <p className="eyebrow">Source & reproducibility</p>
-            <h2>Open method, synthetic preview</h2>
-            <p>
-              This preview contains public samples and aggregate synthetic
-              results only. Hidden scored content remains outside Convex and the
-              web application.
-            </p>
-          </div>
-          <a
-            className="button button--paper"
-            href="https://github.com/felixlaga/BenchBazaar"
-            rel="noreferrer"
-            target="_blank"
-          >
-            <Github aria-hidden="true" size={17} /> View source
-          </a>
-        </section>
+        {benchmark.repositoryUrl && (
+          <section className="source-card">
+            <Box aria-hidden="true" size={24} />
+            <div>
+              <p className="eyebrow">Source & reproducibility</p>
+              <h2>Public benchmark repository</h2>
+              <p>
+                Inspect the author-provided public implementation and supporting
+                materials on GitHub.
+              </p>
+            </div>
+            <a
+              className="button button--paper"
+              href={benchmark.repositoryUrl}
+              rel="noreferrer"
+              target="_blank"
+            >
+              <Github aria-hidden="true" size={17} /> View on GitHub
+            </a>
+          </section>
+        )}
 
         {data.relatedBenchmarks.length > 0 && (
           <section className="content-section">
