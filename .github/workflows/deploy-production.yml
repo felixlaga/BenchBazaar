@@ -1,0 +1,59 @@
+name: Deploy production
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm_launch:
+        description: Type DEPLOY_PRODUCTION after completing the launch checklist
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: benchbazaar-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: inputs.confirm_launch == 'DEPLOY_PRODUCTION'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    environment: production
+    env:
+      CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
+      FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+      FLY_APP_NAME: ${{ vars.FLY_APP_NAME }}
+      PRODUCTION_CONVEX_URL: ${{ vars.PRODUCTION_CONVEX_URL }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.18.3
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm check
+      - run: pnpm build
+        env:
+          VITE_CONVEX_URL: ${{ env.PRODUCTION_CONVEX_URL }}
+      - run: pnpm leak:scan
+      - name: Deploy Convex functions
+        run: pnpm exec convex deploy --message "GitHub production deployment $GITHUB_SHA"
+      - name: Enforce real consented launch content
+        run: |
+          launch_result="$(pnpm exec convex run internal.launch.readiness '{"confirmProductionReview":true}')"
+          echo "$launch_result"
+          echo "$launch_result" | jq -e '.ready == true'
+      - uses: superfly/flyctl-actions/setup-flyctl@ed8efb33836e8b2096c7fd3ba1c8afe303ebbff1
+      - name: Deploy web application
+        run: >-
+          flyctl deploy
+          --app "$FLY_APP_NAME"
+          --build-arg "VITE_CONVEX_URL=$PRODUCTION_CONVEX_URL"
+          --remote-only
+      - name: Verify production health
+        run: flyctl checks list --app "$FLY_APP_NAME"

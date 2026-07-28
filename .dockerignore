@@ -1,0 +1,11 @@
+.git
+.github
+.env
+.env.*
+.output
+.pnpm-store
+node_modules
+playwright-report
+test-results
+coverage
+*.log
