@@ -19,6 +19,14 @@ export function MarketCard({ benchmark, featured = false }: MarketCardProps) {
         aria-hidden="true"
         className={`awning awning--${benchmark.aisle.id}`}
       />
+      {benchmark.coverImageUrl && (
+        <img
+          alt=""
+          className="market-card__cover"
+          loading="lazy"
+          src={benchmark.coverImageUrl}
+        />
+      )}
       <div className="market-card__body">
         <div className="market-card__overline">
           <span>{benchmark.aisle.label}</span>

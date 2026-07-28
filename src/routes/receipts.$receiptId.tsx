@@ -6,6 +6,7 @@ import { ArrowLeft, BadgeCheck, CircleAlert, ExternalLink } from 'lucide-react'
 import { CopyButton } from '#/components/ui/copy-button'
 import { StatusBanner } from '#/components/ui/status-banner'
 import { ReceiptPaper } from '#/features/catalog/components/receipt-paper'
+import { ReportForm } from '#/features/moderation/components/report-form'
 import { ReceiptActions } from '#/features/receipts/components/receipt-actions'
 
 import { api } from '../../convex/_generated/api'
@@ -194,6 +195,7 @@ function ReceiptPage() {
       </div>
 
       <ReceiptActions receiptId={receipt.id} />
+      <ReportForm targetId={receipt.id} targetType="receipt" />
 
       <section className="receipt-share" aria-labelledby="receipt-share-title">
         <div>

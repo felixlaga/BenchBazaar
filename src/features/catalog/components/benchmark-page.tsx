@@ -14,6 +14,7 @@ import {
 import { SectionHeading } from '#/components/ui/section-heading'
 import { StatusBanner } from '#/components/ui/status-banner'
 import { BasketButton } from '#/features/basket/components/basket-button'
+import { ReportForm } from '#/features/moderation/components/report-form'
 import { formatDate } from '#/lib/format'
 
 import type { BenchmarkPageData } from '../domain/catalog'
@@ -117,6 +118,13 @@ export function BenchmarkPage({
             </div>
             <aside className="listing-ticket">
               <div className="listing-ticket__awning" />
+              {benchmark.coverImageUrl && (
+                <img
+                  alt=""
+                  className="listing-ticket__cover"
+                  src={benchmark.coverImageUrl}
+                />
+              )}
               <p>LISTING CARD</p>
               <strong>{benchmark.title}</strong>
               <span>VERSION {benchmark.version}</span>
@@ -383,6 +391,8 @@ export function BenchmarkPage({
             </div>
           </section>
         )}
+
+        <ReportForm targetId={benchmark.slug} targetType="benchmark" />
 
         <div className="next-listing">
           <Link params={{ aisle: benchmark.aisle.id }} to="/aisles/$aisle">

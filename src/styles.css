@@ -1163,6 +1163,19 @@ button.mobile-menu__link {
   padding: 20px;
 }
 
+.market-card__cover,
+.listing-ticket__cover {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-bottom: 1.5px solid var(--ink);
+  object-fit: cover;
+}
+
+.listing-ticket__cover {
+  margin: 0 0 14px;
+  border: 1.5px solid var(--ink);
+}
+
 .market-card__overline {
   display: flex;
   min-height: 25px;

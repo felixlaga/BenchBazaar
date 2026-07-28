@@ -1,10 +1,17 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { AuthLoading, Authenticated, Unauthenticated } from 'convex/react'
+import { Link, createFileRoute } from '@tanstack/react-router'
+import {
+  AuthLoading,
+  Authenticated,
+  Unauthenticated,
+  useQuery,
+} from 'convex/react'
 import { Github } from 'lucide-react'
 
 import { StatusBanner } from '#/components/ui/status-banner'
 import { OwnerWorkspace } from '#/features/publishing/components/owner-workspace'
 import { ReceiptWorkspace } from '#/features/receipts/components/receipt-workspace'
+
+import { api } from '../../convex/_generated/api'
 
 export const Route = createFileRoute('/dashboard')({
   head: () => ({
@@ -41,9 +48,26 @@ function DashboardPage() {
         </StatusBanner>
       </Unauthenticated>
       <Authenticated>
+        <DashboardLinks />
         <OwnerWorkspace />
         <ReceiptWorkspace />
       </Authenticated>
     </div>
+  )
+}
+
+function DashboardLinks() {
+  const viewer = useQuery(api.users.viewer, {})
+  return (
+    <p>
+      <Link to="/requests">Run requests</Link> ·{' '}
+      <Link to="/settings/runners">Runner keys</Link>
+      {viewer?.role === 'admin' ? (
+        <>
+          {' · '}
+          <Link to="/settings/launch">Launch content review</Link>
+        </>
+      ) : null}
+    </p>
   )
 }

@@ -49,6 +49,7 @@ export type BenchmarkSummary = {
   slug: string
   title: string
   summary: string
+  coverImageUrl?: string
   aisle: Aisle
   vendor: Vendor
   version: string
