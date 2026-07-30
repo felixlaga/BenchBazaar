@@ -359,6 +359,11 @@ export default defineSchema({
   })
     .index('by_publicId', ['publicId'])
     .index('by_benchmarkVersionId_trackId', ['benchmarkVersionId', 'trackId'])
+    .index('by_benchmarkVersionId_trackId_primaryMetricValue', [
+      'benchmarkVersionId',
+      'trackId',
+      'primaryMetricValue',
+    ])
     .index('by_benchmarkVersionId_trackId_modelId', [
       'benchmarkVersionId',
       'trackId',
@@ -528,13 +533,22 @@ export default defineSchema({
       'updatedAt',
     ]),
 
+  // Maintained aggregate counts for the marketplace stats shown on the home
+  // page, so that public query does not scan the whole table on every load.
+  counters: defineTable({
+    name: v.string(),
+    value: v.number(),
+  }).index('by_name', ['name']),
+
   rateLimits: defineTable({
     key: v.string(),
     operation: v.string(),
     windowStart: v.number(),
     count: v.number(),
     updatedAt: v.number(),
-  }).index('by_key_operation_windowStart', ['key', 'operation', 'windowStart']),
+  })
+    .index('by_key_operation_windowStart', ['key', 'operation', 'windowStart'])
+    .index('by_windowStart', ['windowStart']),
 
   receiptIngestionAttempts: defineTable({
     requestId: v.string(),

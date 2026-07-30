@@ -68,6 +68,7 @@ function LaunchWorkspace() {
   const workspace = useQuery(api.launch.workspace, {})
   const recordConsent = useMutation(api.launch.recordConsent)
   const [message, setMessage] = useState('')
+  const [submitting, setSubmitting] = useState(false)
 
   if (!workspace) return <p>Loading eligible benchmarks…</p>
   const readyWorkspace = workspace
@@ -81,9 +82,11 @@ function LaunchWorkspace() {
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
+    if (submitting) return
     const form = event.currentTarget
     const data = new FormData(form)
     const evidenceUrl = String(data.get('evidenceUrl') ?? '').trim()
+    setSubmitting(true)
     setMessage('Recording consent…')
     try {
       await recordConsent({
@@ -99,6 +102,8 @@ function LaunchWorkspace() {
       form.reset()
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Consent failed.')
+    } finally {
+      setSubmitting(false)
     }
   }
 
@@ -144,8 +149,12 @@ function LaunchWorkspace() {
             Exact attestation
             <textarea readOnly rows={5} value={readyWorkspace.statement} />
           </label>
-          <button className="button button--ink" type="submit">
-            Record verified consent
+          <button
+            className="button button--ink"
+            disabled={submitting}
+            type="submit"
+          >
+            {submitting ? 'Recording…' : 'Record verified consent'}
           </button>
         </form>
       )}

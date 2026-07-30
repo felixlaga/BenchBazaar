@@ -23,7 +23,7 @@ export const Route = createFileRoute('/api/social/receipt/$receiptId')({
               `${receipt.primaryMetric.label} ${receipt.primaryMetric.value}${receipt.primaryMetric.unit === '%' ? '%' : ''}`,
               receipt.verification.label,
               receipt.compatibility.compatible ? 'compatible' : 'incompatible',
-              'synthetic preview',
+              ...(receipt.synthetic ? ['synthetic preview'] : []),
             ],
           }),
         )

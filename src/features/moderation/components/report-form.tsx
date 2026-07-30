@@ -12,11 +12,14 @@ export function ReportForm({
 }) {
   const report = useMutation(api.moderation.report)
   const [message, setMessage] = useState('')
+  const [pending, setPending] = useState(false)
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
+    if (pending) return
     const form = event.currentTarget
     const data = new FormData(form)
+    setPending(true)
     setMessage('Sending report…')
     try {
       await report({
@@ -34,6 +37,8 @@ export function ReportForm({
       form.reset()
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Report failed.')
+    } finally {
+      setPending(false)
     }
   }
 
@@ -56,8 +61,12 @@ export function ReportForm({
             Details
             <textarea maxLength={2000} minLength={20} name="details" required />
           </label>
-          <button className="button button--paper" type="submit">
-            Submit private report
+          <button
+            className="button button--paper"
+            disabled={pending}
+            type="submit"
+          >
+            {pending ? 'Submitting…' : 'Submit private report'}
           </button>
           {message && <p role="status">{message}</p>}
         </form>

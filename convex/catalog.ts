@@ -20,6 +20,7 @@ import { aisles } from '../src/features/catalog/domain/aisles'
 import type { Doc } from './_generated/dataModel'
 import type { QueryCtx } from './_generated/server'
 import { query as defineQuery } from './_generated/server'
+import { readCounter } from './lib/counters'
 import { getReceiptCompatibilityIssues } from './lib/receipt_compatibility'
 
 const PAGE_SIZE = 6
@@ -143,6 +144,24 @@ function publicVersionStatus(status: Doc<'benchmarkVersions'>['status']) {
     status === 'deprecated'
     ? status
     : null
+}
+
+// Build a list through an async mapper, dropping any item whose builder throws
+// (e.g. a suspended version or an incomplete row) so one bad record cannot fail
+// an entire public listing query.
+async function mapResilient<TItem, TResult>(
+  items: readonly TItem[],
+  build: (item: TItem) => Promise<TResult>,
+): Promise<TResult[]> {
+  const settled = await Promise.all(
+    items.map((item) =>
+      build(item).then(
+        (value) => ({ ok: true, value }) as const,
+        () => ({ ok: false }) as const,
+      ),
+    ),
+  )
+  return settled.flatMap((result) => (result.ok ? [result.value] : []))
 }
 
 async function toBenchmarkSummary(
@@ -461,11 +480,16 @@ async function benchmarkPageData(
         version.tracks.map((track) =>
           ctx.db
             .query('receipts')
-            .withIndex('by_benchmarkVersionId_trackId', (query) =>
-              query
-                .eq('benchmarkVersionId', version._id)
-                .eq('trackId', track.id),
+            .withIndex(
+              'by_benchmarkVersionId_trackId_primaryMetricValue',
+              (query) =>
+                query
+                  .eq('benchmarkVersionId', version._id)
+                  .eq('trackId', track.id),
             )
+            // Order by the metric itself so the true best receipts survive the
+            // MAX_SECTION_RESULTS slice, not just the oldest-inserted ones.
+            .order(track.metricDirection === 'minimize' ? 'asc' : 'desc')
             .take(MAX_SECTION_RESULTS),
         ),
       ),
@@ -479,8 +503,8 @@ async function benchmarkPageData(
     ],
   )
   const receiptDocuments = receiptsByTrack.flat()
-  const publicReceipts = await Promise.all(
-    receiptDocuments.map((receipt) => toReceipt(ctx, receipt)),
+  const publicReceipts = await mapResilient(receiptDocuments, (receipt) =>
+    toReceipt(ctx, receipt),
   )
   const benchmarkDetail = await toBenchmarkDetail(
     ctx,
@@ -511,11 +535,11 @@ async function benchmarkPageData(
       (left, right) =>
         Date.parse(right.submittedAt) - Date.parse(left.submittedAt),
     ),
-    relatedBenchmarks: await Promise.all(
+    relatedBenchmarks: await mapResilient(
       relatedDocuments
         .filter((candidate) => candidate._id !== benchmark._id)
-        .slice(0, 4)
-        .map((candidate) => toBenchmarkSummary(ctx, candidate)),
+        .slice(0, 4),
+      (candidate) => toBenchmarkSummary(ctx, candidate),
     ),
   }
 }
@@ -543,66 +567,66 @@ function matchesBrowseFilters(
 export const home = defineQuery({
   args: {},
   handler: async (ctx): Promise<HomePageData> => {
-    const [fresh, curated, popular, recentReceiptDocuments, counts] =
-      await Promise.all([
-        ctx.db
-          .query('benchmarks')
-          .withIndex('by_status_publishedAt', (query) =>
-            query.eq('status', 'published'),
-          )
-          .order('desc')
-          .take(4),
-        ctx.db
-          .query('benchmarks')
-          .withIndex('by_status_curatorPick_publishedAt', (query) =>
-            query.eq('status', 'published').eq('curatorPick', true),
-          )
-          .order('desc')
-          .take(4),
-        ctx.db
-          .query('benchmarks')
-          .withIndex('by_status_receiptCount', (query) =>
-            query.eq('status', 'published'),
-          )
-          .order('desc')
-          .take(4),
-        ctx.db
-          .query('receipts')
-          .withIndex('by_status_submittedAt', (query) =>
-            query.eq('status', 'valid'),
-          )
-          .order('desc')
-          .take(4),
-        Promise.all([
-          ctx.db
-            .query('benchmarks')
-            .withIndex('by_status_publishedAt', (query) =>
-              query.eq('status', 'published'),
-            )
-            .take(10_000),
-          ctx.db.query('receipts').take(10_000),
-          ctx.db.query('models').take(10_000),
-        ]),
-      ])
+    const [
+      fresh,
+      curated,
+      popular,
+      recentReceiptDocuments,
+      benchmarkCount,
+      receiptCount,
+      modelCount,
+    ] = await Promise.all([
+      ctx.db
+        .query('benchmarks')
+        .withIndex('by_status_publishedAt', (query) =>
+          query.eq('status', 'published'),
+        )
+        .order('desc')
+        .take(4),
+      ctx.db
+        .query('benchmarks')
+        .withIndex('by_status_curatorPick_publishedAt', (query) =>
+          query.eq('status', 'published').eq('curatorPick', true),
+        )
+        .order('desc')
+        .take(4),
+      ctx.db
+        .query('benchmarks')
+        .withIndex('by_status_receiptCount', (query) =>
+          query.eq('status', 'published'),
+        )
+        .order('desc')
+        .take(4),
+      ctx.db
+        .query('receipts')
+        .withIndex('by_status_submittedAt', (query) =>
+          query.eq('status', 'valid'),
+        )
+        .order('desc')
+        .take(4),
+      readCounter(ctx, 'publishedBenchmarks'),
+      readCounter(ctx, 'receipts'),
+      readCounter(ctx, 'models'),
+    ])
 
     return {
       featuredAisles: aisles,
-      freshBenchmarks: await Promise.all(
-        fresh.map((benchmark) => toBenchmarkSummary(ctx, benchmark)),
+      freshBenchmarks: await mapResilient(fresh, (benchmark) =>
+        toBenchmarkSummary(ctx, benchmark),
       ),
-      curatorPicks: await Promise.all(
-        curated.map((benchmark) => toBenchmarkSummary(ctx, benchmark)),
+      curatorPicks: await mapResilient(curated, (benchmark) =>
+        toBenchmarkSummary(ctx, benchmark),
       ),
-      bestSellers: await Promise.all(
-        popular.map((benchmark) => toBenchmarkSummary(ctx, benchmark)),
+      bestSellers: await mapResilient(popular, (benchmark) =>
+        toBenchmarkSummary(ctx, benchmark),
       ),
-      recentReceipts: await Promise.all(
-        recentReceiptDocuments.map((receipt) => toReceipt(ctx, receipt)),
+      recentReceipts: await mapResilient(recentReceiptDocuments, (receipt) =>
+        toReceipt(ctx, receipt),
       ),
       marketStats: {
-        benchmarks: counts[0].length,
-        receipts: counts[1].length,
-        models: counts[2].length,
+        benchmarks: benchmarkCount,
+        receipts: receiptCount,
+        models: modelCount,
       },
     }
   },
@@ -721,8 +745,8 @@ export const browse = defineQuery({
     }
 
     return {
-      items: await Promise.all(
-        documents.map((benchmark) => toBenchmarkSummary(ctx, benchmark)),
+      items: await mapResilient(documents, (benchmark) =>
+        toBenchmarkSummary(ctx, benchmark),
       ),
       continueCursor: page.continueCursor,
       isDone: page.isDone,
@@ -765,15 +789,18 @@ export const aisle = defineQuery({
     return {
       aisle: aisleDefinition,
       ...(curated
-        ? { curatorPick: await toBenchmarkSummary(ctx, curated) }
+        ? await mapResilient([curated], (benchmark) =>
+            toBenchmarkSummary(ctx, benchmark),
+          ).then((list) => (list[0] ? { curatorPick: list[0] } : {}))
         : {}),
-      newest: await Promise.all(
-        newest.map((benchmark) => toBenchmarkSummary(ctx, benchmark)),
+      newest: await mapResilient(newest, (benchmark) =>
+        toBenchmarkSummary(ctx, benchmark),
       ),
-      mostReproduced: await Promise.all(
-        reproduced
-          .filter((benchmark) => benchmark.independentReproductionCount > 0)
-          .map((benchmark) => toBenchmarkSummary(ctx, benchmark)),
+      mostReproduced: await mapResilient(
+        reproduced.filter(
+          (benchmark) => benchmark.independentReproductionCount > 0,
+        ),
+        (benchmark) => toBenchmarkSummary(ctx, benchmark),
       ),
     }
   },
@@ -829,8 +856,8 @@ export const stallByHandle = defineQuery({
         .order('desc')
         .take(12),
     ])
-    const receipts = await Promise.all(
-      recentReceiptDocuments.map((receipt) => toReceipt(ctx, receipt)),
+    const receipts = await mapResilient(recentReceiptDocuments, (receipt) =>
+      toReceipt(ctx, receipt),
     )
 
     return {
@@ -844,10 +871,8 @@ export const stallByHandle = defineQuery({
           : {}),
       },
       benchmarks: {
-        items: await Promise.all(
-          benchmarkPage.page.map((benchmark) =>
-            toBenchmarkSummary(ctx, benchmark),
-          ),
+        items: await mapResilient(benchmarkPage.page, (benchmark) =>
+          toBenchmarkSummary(ctx, benchmark),
         ),
         continueCursor: benchmarkPage.continueCursor,
         isDone: benchmarkPage.isDone,
@@ -889,8 +914,8 @@ export const modelBySlug = defineQuery({
       )
       .order('desc')
       .paginate(args.paginationOpts)
-    const mappedReceipts = await Promise.all(
-      receiptPage.page.map((receipt) => toReceipt(ctx, receipt)),
+    const mappedReceipts = await mapResilient(receiptPage.page, (receipt) =>
+      toReceipt(ctx, receipt),
     )
     const items = mappedReceipts.filter(
       (receipt) =>

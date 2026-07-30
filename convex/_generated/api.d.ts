@@ -10,14 +10,17 @@
 
 import type * as basket from "../basket.js";
 import type * as catalog from "../catalog.js";
+import type * as crons from "../crons.js";
 import type * as drafts from "../drafts.js";
 import type * as http from "../http.js";
 import type * as launch from "../launch.js";
 import type * as lib_authorization from "../lib/authorization.js";
+import type * as lib_counters from "../lib/counters.js";
 import type * as lib_rate_limits from "../lib/rate_limits.js";
 import type * as lib_receipt_compatibility from "../lib/receipt_compatibility.js";
 import type * as lib_receipt_counters from "../lib/receipt_counters.js";
 import type * as lib_save_counters from "../lib/save_counters.js";
+import type * as maintenance from "../maintenance.js";
 import type * as moderation from "../moderation.js";
 import type * as receipts from "../receipts.js";
 import type * as runRequests from "../runRequests.js";
@@ -35,14 +38,17 @@ import type {
 declare const fullApi: ApiFromModules<{
   basket: typeof basket;
   catalog: typeof catalog;
+  crons: typeof crons;
   drafts: typeof drafts;
   http: typeof http;
   launch: typeof launch;
   "lib/authorization": typeof lib_authorization;
+  "lib/counters": typeof lib_counters;
   "lib/rate_limits": typeof lib_rate_limits;
   "lib/receipt_compatibility": typeof lib_receipt_compatibility;
   "lib/receipt_counters": typeof lib_receipt_counters;
   "lib/save_counters": typeof lib_save_counters;
+  maintenance: typeof maintenance;
   moderation: typeof moderation;
   receipts: typeof receipts;
   runRequests: typeof runRequests;

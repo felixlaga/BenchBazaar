@@ -1,5 +1,10 @@
 import { Link, createFileRoute, notFound } from '@tanstack/react-router'
-import { Authenticated, Unauthenticated, useQuery } from 'convex/react'
+import {
+  AuthLoading,
+  Authenticated,
+  Unauthenticated,
+  useQuery,
+} from 'convex/react'
 
 import { StatusBanner } from '#/components/ui/status-banner'
 
@@ -19,6 +24,9 @@ function RunRequestPage() {
   const { requestId } = Route.useParams()
   return (
     <div className="page-shell settings-page">
+      <AuthLoading>
+        <p className="save-state">Checking your stall key…</p>
+      </AuthLoading>
       <Unauthenticated>
         <StatusBanner variant="warning" title="Sign in required">
           <a href="/api/auth/sign-in">Continue with GitHub</a>

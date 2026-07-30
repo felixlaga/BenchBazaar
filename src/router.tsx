@@ -11,6 +11,7 @@ import {
 import { useCallback, useMemo } from 'react'
 
 import { AuthenticatedUserSync } from '#/features/auth/components/authenticated-user-sync'
+import { ErrorPage, NotFoundPage } from '#/components/layout/page-states'
 import { readPublicEnvironment } from '#/lib/env/public'
 
 import { routeTree } from './routeTree.gen'
@@ -38,6 +39,10 @@ export function getRouter() {
     scrollRestoration: true,
     defaultPreload: 'intent',
     defaultPreloadStaleTime: 0,
+    // Catch route-level errors inside the <Outlet/> so the header/footer shell
+    // survives a transient data failure instead of being replaced wholesale.
+    defaultErrorComponent: ErrorPage,
+    defaultNotFoundComponent: NotFoundPage,
     Wrap: ({ children }) => (
       <AuthKitProvider>
         <ConvexProviderWithAuth

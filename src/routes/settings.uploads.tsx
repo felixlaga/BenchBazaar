@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import {
+  AuthLoading,
   Authenticated,
   Unauthenticated,
   useMutation,
@@ -33,6 +34,9 @@ function UploadSettingsPage() {
           scripts, packages, and sealed benchmark files are rejected.
         </p>
       </header>
+      <AuthLoading>
+        <p className="save-state">Checking your stall key…</p>
+      </AuthLoading>
       <Unauthenticated>
         <StatusBanner variant="warning" title="Sign in required">
           <a href="/api/auth/sign-in?returnPathname=%2Fsettings%2Fuploads">
@@ -52,10 +56,12 @@ function UploadForm() {
   const createIntent = useMutation(api.uploads.createIntent)
   const finalize = useMutation(api.uploads.finalize)
   const [message, setMessage] = useState('')
+  const [pending, setPending] = useState(false)
   if (!benchmarks) return <p>Loading owned benchmarks…</p>
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
+    if (pending) return
     const data = new FormData(event.currentTarget)
     const file = data.get('image')
     if (!(file instanceof File)) {
@@ -65,6 +71,7 @@ function UploadForm() {
     const benchmarkId = String(
       data.get('benchmarkId') ?? '',
     ) as Id<'benchmarks'>
+    setPending(true)
     setMessage('Validating and uploading image…')
     try {
       const intent = await createIntent({})
@@ -94,6 +101,8 @@ function UploadForm() {
       )
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Upload failed.')
+    } finally {
+      setPending(false)
     }
   }
 
@@ -118,8 +127,8 @@ function UploadForm() {
           type="file"
         />
       </label>
-      <button className="button button--ink" type="submit">
-        Upload public image
+      <button className="button button--ink" disabled={pending} type="submit">
+        {pending ? 'Uploading…' : 'Upload public image'}
       </button>
       {message && <p role="status">{message}</p>}
     </form>

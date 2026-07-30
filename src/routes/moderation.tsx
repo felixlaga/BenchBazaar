@@ -72,6 +72,7 @@ function ModerationWorkspace() {
   const setReceiptStatus = useMutation(api.moderation.setReceiptStatus)
   const setRunnerStatus = useMutation(api.runners.moderateStatus)
   const [message, setMessage] = useState('')
+  const [pending, setPending] = useState(false)
 
   async function actOnReport(
     event: React.FormEvent<HTMLFormElement>,
@@ -82,9 +83,11 @@ function ModerationWorkspace() {
     },
   ) {
     event.preventDefault()
+    if (pending) return
     const data = new FormData(event.currentTarget)
     const intent = String(data.get('intent'))
     const reason = String(data.get('reason') ?? '')
+    setPending(true)
     setMessage('Applying moderation action…')
     try {
       if (intent === 'dismiss') {
@@ -116,6 +119,31 @@ function ModerationWorkspace() {
       setMessage('Moderation action recorded.')
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Action failed.')
+    } finally {
+      setPending(false)
+    }
+  }
+
+  async function moderateRunner(key: { publicId: string; status: string }) {
+    if (pending) return
+    setPending(true)
+    setMessage('Applying runner action…')
+    try {
+      await setRunnerStatus({
+        publicId: key.publicId,
+        status: key.status === 'suspended' ? 'active' : 'suspended',
+        reason:
+          key.status === 'suspended'
+            ? 'Moderator restored this runner after reviewing the suspension.'
+            : 'Moderator suspended this runner pending provenance review.',
+      })
+      setMessage('Runner action recorded.')
+    } catch (error) {
+      setMessage(
+        error instanceof Error ? error.message : 'Runner action failed.',
+      )
+    } finally {
+      setPending(false)
     }
   }
 
@@ -152,6 +180,7 @@ function ModerationWorkspace() {
                 </label>
                 <button
                   className="button button--paper"
+                  disabled={pending}
                   name="intent"
                   type="submit"
                   value="dismiss"
@@ -162,6 +191,7 @@ function ModerationWorkspace() {
                   <>
                     <button
                       className="button button--paper"
+                      disabled={pending}
                       name="intent"
                       type="submit"
                       value="hide"
@@ -170,6 +200,7 @@ function ModerationWorkspace() {
                     </button>
                     <button
                       className="button button--paper"
+                      disabled={pending}
                       name="intent"
                       type="submit"
                       value="suspend"
@@ -181,6 +212,7 @@ function ModerationWorkspace() {
                   <>
                     <button
                       className="button button--paper"
+                      disabled={pending}
                       name="intent"
                       type="submit"
                       value="dispute"
@@ -189,6 +221,7 @@ function ModerationWorkspace() {
                     </button>
                     <button
                       className="button button--paper"
+                      disabled={pending}
                       name="intent"
                       type="submit"
                       value="invalidate"
@@ -217,22 +250,8 @@ function ModerationWorkspace() {
             {key.status !== 'revoked' && (
               <button
                 className="button button--paper"
-                onClick={() =>
-                  void setRunnerStatus({
-                    publicId: key.publicId,
-                    status: key.status === 'suspended' ? 'active' : 'suspended',
-                    reason:
-                      key.status === 'suspended'
-                        ? 'Moderator restored this runner after reviewing the suspension.'
-                        : 'Moderator suspended this runner pending provenance review.',
-                  }).catch((error) =>
-                    setMessage(
-                      error instanceof Error
-                        ? error.message
-                        : 'Runner action failed.',
-                    ),
-                  )
-                }
+                disabled={pending}
+                onClick={() => void moderateRunner(key)}
                 type="button"
               >
                 {key.status === 'suspended' ? 'Restore' : 'Suspend'}

@@ -4,6 +4,7 @@ import type { Doc } from './_generated/dataModel'
 import { mutation, query as defineQuery } from './_generated/server'
 import type { MutationCtx, QueryCtx } from './_generated/server'
 import { requireRole, requireUser } from './lib/authorization'
+import { bumpCounter } from './lib/counters'
 import { reconcileBenchmarkReceiptCounters } from './lib/receipt_counters'
 import { enforceRateLimit } from './lib/rate_limits'
 
@@ -205,10 +206,15 @@ export const setBenchmarkStatus = mutation({
     }
     const reason = bounded(args.reason, 10, 1_000, 'MODERATION_REASON_REQUIRED')
     const now = Date.now()
+    const wasPublished = benchmark.status === 'published'
+    const willBePublished = args.status === 'published'
     await ctx.db.patch(benchmark._id, {
       status: args.status,
       updatedAt: now,
     })
+    if (wasPublished !== willBePublished) {
+      await bumpCounter(ctx, 'publishedBenchmarks', willBePublished ? 1 : -1)
+    }
     await ctx.db.insert('auditEvents', {
       actorId: moderator._id,
       action: `benchmark.${args.status}`,

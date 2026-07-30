@@ -6,6 +6,7 @@ import {
 } from '../src/features/catalog/data/catalog.fixtures'
 import type { Id } from './_generated/dataModel'
 import { internalMutation } from './_generated/server'
+import { reconcileCounters } from './lib/counters'
 
 const SEED_OWNER_EXTERNAL_ID = 'synthetic:benchbazaar-preview'
 const HISTORICAL_VERSION_COUNT = 2
@@ -561,6 +562,8 @@ export const loadSyntheticCatalog = internalMutation({
         ).length,
       })
     }
+
+    await reconcileCounters(ctx)
 
     return {
       created: {

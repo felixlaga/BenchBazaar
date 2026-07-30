@@ -14,6 +14,18 @@ export const Route = createFileRoute('/collections/$slug')({
     if (!collection) throw notFound()
     return collection
   },
+  head: ({ loaderData, params }) => ({
+    meta: loaderData
+      ? [
+          { title: `${loaderData.title} · BenchBazaar` },
+          { name: 'description', content: loaderData.description },
+          { property: 'og:type', content: 'website' },
+          { property: 'og:title', content: loaderData.title },
+          { property: 'og:description', content: loaderData.description },
+        ]
+      : [],
+    links: [{ rel: 'canonical', href: `/collections/${params.slug}` }],
+  }),
   component: PublicCollectionPage,
 })
 
@@ -31,17 +43,30 @@ function PublicCollectionPage() {
         <p>{collection.description}</p>
         <small>{collection.rankingRule}</small>
       </header>
-      <ol className="version-list">
-        {collection.entries.map((entry) => (
-          <li key={entry.slug}>
-            <Link params={{ slug: entry.slug }} to="/b/$slug">
-              <strong>{entry.title}</strong>
-            </Link>
-            <p>{entry.summary}</p>
-            {entry.note && <p>{entry.note}</p>}
-          </li>
-        ))}
-      </ol>
+      {collection.entries.length === 0 ? (
+        <div className="empty-state empty-state--large">
+          <strong>Nothing on this list yet</strong>
+          <p>
+            This collection has no published benchmarks right now. Check back
+            soon.
+          </p>
+          <Link className="button button--paper" to="/browse">
+            Browse the bazaar
+          </Link>
+        </div>
+      ) : (
+        <ol className="version-list">
+          {collection.entries.map((entry) => (
+            <li key={entry.slug}>
+              <Link params={{ slug: entry.slug }} to="/b/$slug">
+                <strong>{entry.title}</strong>
+              </Link>
+              <p>{entry.summary}</p>
+              {entry.note && <p>{entry.note}</p>}
+            </li>
+          ))}
+        </ol>
+      )}
     </div>
   )
 }

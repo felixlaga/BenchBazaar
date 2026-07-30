@@ -63,9 +63,12 @@ function RunnerKeyWorkspace() {
     'all_owner_benchmarks',
   )
   const [message, setMessage] = useState('')
+  const [pending, setPending] = useState(false)
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
+    if (pending) return
+    setPending(true)
     setMessage('Registering public key…')
     const formElement = event.currentTarget
     const form = new FormData(formElement)
@@ -88,6 +91,8 @@ function RunnerKeyWorkspace() {
       setMessage(
         error instanceof Error ? error.message : 'Registration failed.',
       )
+    } finally {
+      setPending(false)
     }
   }
 
@@ -138,8 +143,8 @@ function RunnerKeyWorkspace() {
             </select>
           </label>
         )}
-        <button className="button button--ink" type="submit">
-          Register public key
+        <button className="button button--ink" disabled={pending} type="submit">
+          {pending ? 'Registering…' : 'Register public key'}
         </button>
         {message && <p role="status">{message}</p>}
       </form>

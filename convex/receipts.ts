@@ -8,6 +8,8 @@ import {
 } from './_generated/server'
 import type { MutationCtx, QueryCtx } from './_generated/server'
 import { requireBenchmarkOwner, requireUser } from './lib/authorization'
+import { bumpCounter } from './lib/counters'
+import { enforceRateLimit } from './lib/rate_limits'
 import { getReceiptCompatibilityIssues } from './lib/receipt_compatibility'
 import { reconcileBenchmarkReceiptCounters } from './lib/receipt_counters'
 
@@ -161,6 +163,7 @@ async function resolveModel(
   })
   const model = await ctx.db.get('models', modelId)
   if (!model) throw new ConvexError({ code: 'MODEL_REGISTRATION_FAILED' })
+  await bumpCounter(ctx, 'models', 1)
   return { model, submittedModelId, created: true }
 }
 
@@ -347,6 +350,12 @@ export const submitManual = mutation({
   args: manualReceiptArgs,
   handler: async (ctx, args) => {
     const user = await requireUser(ctx)
+    await enforceRateLimit(ctx, {
+      key: String(user._id),
+      operation: 'receipts.submitManual',
+      limit: 60,
+      windowMs: 24 * 60 * 60 * 1_000,
+    })
     const version = await ctx.db.get(
       'benchmarkVersions',
       args.benchmarkVersionId,
@@ -567,6 +576,7 @@ export const submitManual = mutation({
       createdAt: now,
     })
     await reconcileBenchmarkReceiptCounters(ctx, benchmark._id)
+    await bumpCounter(ctx, 'receipts', 1)
 
     return {
       receiptId: publicId,
@@ -651,6 +661,12 @@ export const dispute = mutation({
   args: { receiptId: v.string(), reason: v.string() },
   handler: async (ctx, args) => {
     const user = await requireUser(ctx)
+    await enforceRateLimit(ctx, {
+      key: String(user._id),
+      operation: 'receipts.dispute',
+      limit: 30,
+      windowMs: 24 * 60 * 60 * 1_000,
+    })
     const receipt = await ctx.db
       .query('receipts')
       .withIndex('by_publicId', (query) => query.eq('publicId', args.receiptId))

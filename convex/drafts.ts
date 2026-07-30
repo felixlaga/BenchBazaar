@@ -7,6 +7,8 @@ import {
   requireDraftOwner,
   requireUser,
 } from './lib/authorization'
+import { bumpCounter } from './lib/counters'
+import { enforceRateLimit } from './lib/rate_limits'
 
 const aisleValidator = v.union(
   v.literal('reasoning-row'),
@@ -212,6 +214,12 @@ export const create = mutation({
   args: {},
   handler: async (ctx) => {
     const user = await requireUser(ctx)
+    await enforceRateLimit(ctx, {
+      key: String(user._id),
+      operation: 'drafts.create',
+      limit: 30,
+      windowMs: 24 * 60 * 60 * 1_000,
+    })
     const now = Date.now()
     const benchmarkId = await ctx.db.insert('benchmarks', {
       ownerId: user._id,
@@ -406,6 +414,14 @@ export const save = mutation({
   },
   handler: async (ctx, args) => {
     const { draft, user } = await requireDraftOwner(ctx, args.draftId)
+    // Generous cap: autosave debounces at 900ms, so a real editor stays well
+    // under 120/min while a scripted hammer is bounded.
+    await enforceRateLimit(ctx, {
+      key: String(user._id),
+      operation: 'drafts.save',
+      limit: 120,
+      windowMs: 60 * 1_000,
+    })
     if (draft.status === 'published' || draft.status === 'publishing') {
       throw new ConvexError({ code: 'DRAFT_NOT_EDITABLE' })
     }
@@ -638,6 +654,12 @@ export const publish = mutation({
   },
   handler: async (ctx, args) => {
     const { draft, user } = await requireDraftOwner(ctx, args.draftId)
+    await enforceRateLimit(ctx, {
+      key: String(user._id),
+      operation: 'drafts.publish',
+      limit: 20,
+      windowMs: 60 * 60 * 1_000,
+    })
     if (draft.publishedVersionId) {
       const published = await ctx.db.get(
         'benchmarkVersions',
@@ -816,6 +838,7 @@ export const publish = mutation({
       await ctx.db.patch(benchmark.currentVersionId, { status: 'historical' })
     }
     const firstTrack = draft.tracks[0]
+    const wasPublished = benchmark.status === 'published'
     await ctx.db.patch(benchmark._id, {
       slug,
       publicRef: `${user.handle}/${slug}`,
@@ -852,6 +875,7 @@ export const publish = mutation({
       publishedVersionId: versionId,
       updatedAt: now,
     })
+    if (!wasPublished) await bumpCounter(ctx, 'publishedBenchmarks', 1)
     await ctx.db.insert('auditEvents', {
       actorId: user._id,
       action: draft.baseVersionId

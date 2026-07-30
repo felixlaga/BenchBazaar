@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import {
+  AuthLoading,
   Authenticated,
   Unauthenticated,
   useMutation,
@@ -33,6 +34,9 @@ function NewRunRequestPage() {
           whether and where to execute the request.
         </p>
       </header>
+      <AuthLoading>
+        <p className="save-state">Checking your stall key…</p>
+      </AuthLoading>
       <Unauthenticated>
         <StatusBanner variant="warning" title="Sign in required">
           <a href="/api/auth/sign-in?returnPathname=%2Frequests%2Fnew">
@@ -52,6 +56,7 @@ function RunRequestForm() {
   const createRequest = useMutation(api.runRequests.create)
   const navigate = useNavigate()
   const [message, setMessage] = useState('')
+  const [pending, setPending] = useState(false)
   if (!options) return <p>Loading available versions and tracks…</p>
   const choices = options.flatMap((benchmark) =>
     benchmark.versions.flatMap((version) =>
@@ -64,6 +69,7 @@ function RunRequestForm() {
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
+    if (pending) return
     const data = new FormData(event.currentTarget)
     const [benchmarkVersionId, trackId] = String(
       data.get('target') ?? '',
@@ -72,6 +78,7 @@ function RunRequestForm() {
       setMessage('Choose an exact benchmark version and track.')
       return
     }
+    setPending(true)
     setMessage('Creating run request…')
     try {
       const result = await createRequest({
@@ -91,6 +98,7 @@ function RunRequestForm() {
       setMessage(
         error instanceof Error ? error.message : 'Could not create request.',
       )
+      setPending(false)
     }
   }
 
@@ -128,8 +136,8 @@ function RunRequestForm() {
         that a model endpoint may retain prompts it receives and that “sealed”
         means hidden from public download, not impossible to leak.
       </label>
-      <button className="button button--ink" type="submit">
-        Request run
+      <button className="button button--ink" disabled={pending} type="submit">
+        {pending ? 'Requesting…' : 'Request run'}
       </button>
       {message && <p role="status">{message}</p>}
     </form>

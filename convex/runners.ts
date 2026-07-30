@@ -14,6 +14,7 @@ import {
   requireRole,
   requireUser,
 } from './lib/authorization'
+import { bumpCounter } from './lib/counters'
 import { getReceiptCompatibilityIssues } from './lib/receipt_compatibility'
 import { reconcileBenchmarkReceiptCounters } from './lib/receipt_counters'
 import { enforceRateLimit } from './lib/rate_limits'
@@ -280,6 +281,7 @@ async function resolveRunnerModel(ctx: MutationCtx, exactModelId: string) {
   })
   const model = await ctx.db.get('models', modelId)
   if (!model) throw new ConvexError({ code: 'MODEL_REGISTRATION_FAILED' })
+  await bumpCounter(ctx, 'models', 1)
   return { model, submittedModelId }
 }
 
@@ -484,6 +486,7 @@ export const ingestVerified = internalMutation({
       createdAt: now,
     })
     await reconcileBenchmarkReceiptCounters(ctx, benchmark._id)
+    await bumpCounter(ctx, 'receipts', 1)
     return { receiptId, publicId: args.receipt.receiptId }
   },
 })
