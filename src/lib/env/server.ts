@@ -89,6 +89,9 @@ export function readDeploymentEnvironment(
   const redirectUrl = new URL(result.data.WORKOS_REDIRECT_URI)
   if (
     siteUrl.protocol !== 'https:' ||
+    siteUrl.pathname !== '/' ||
+    siteUrl.search ||
+    siteUrl.hash ||
     redirectUrl.protocol !== 'https:' ||
     siteUrl.origin !== redirectUrl.origin ||
     redirectUrl.pathname !== '/api/auth/callback' ||
@@ -96,8 +99,12 @@ export function readDeploymentEnvironment(
     redirectUrl.hash
   ) {
     throw new Error(
-      'Hosted environments require HTTPS and an exact same-origin WorkOS callback at /api/auth/callback.',
+      'Hosted environments require a canonical HTTPS origin and an exact same-origin WorkOS callback at /api/auth/callback.',
     )
   }
-  return result.data
+  return {
+    ...result.data,
+    PUBLIC_SITE_URL: siteUrl.origin,
+    WORKOS_REDIRECT_URI: redirectUrl.toString(),
+  }
 }

@@ -2,6 +2,8 @@ import { convexQuery } from '@convex-dev/react-query'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { Link, createFileRoute, notFound } from '@tanstack/react-router'
 
+import { createSeoMetadata } from '#/lib/seo/metadata'
+
 import { api } from '../../convex/_generated/api'
 
 export const Route = createFileRoute('/collections/$slug')({
@@ -14,18 +16,16 @@ export const Route = createFileRoute('/collections/$slug')({
     if (!collection) throw notFound()
     return collection
   },
-  head: ({ loaderData, params }) => ({
-    meta: loaderData
-      ? [
-          { title: `${loaderData.title} · BenchBazaar` },
-          { name: 'description', content: loaderData.description },
-          { property: 'og:type', content: 'website' },
-          { property: 'og:title', content: loaderData.title },
-          { property: 'og:description', content: loaderData.description },
-        ]
-      : [],
-    links: [{ rel: 'canonical', href: `/collections/${params.slug}` }],
-  }),
+  head: ({ loaderData, match, params }) =>
+    loaderData
+      ? createSeoMetadata({
+          siteOrigin: match.context.siteOrigin,
+          pathname: `/collections/${params.slug}`,
+          title: `${loaderData.title} · BenchBazaar`,
+          description: loaderData.description,
+          imageAlt: `${loaderData.title}, a BenchBazaar curator collection`,
+        })
+      : {},
   component: PublicCollectionPage,
 })
 

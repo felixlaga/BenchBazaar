@@ -6,11 +6,49 @@ test('@smoke serves static public content with the security boundary', async ({
 }) => {
   const health = await request.get('/api/health')
   expect(health.ok()).toBe(true)
+  expect(health.headers()['x-robots-tag']).toBe('noindex, nofollow')
   await expect(health.json()).resolves.toMatchObject({
     ok: true,
     service: 'benchbazaar-web',
     sealedContentStored: false,
   })
+
+  const aboutResponse = await request.get('/about')
+  expect(aboutResponse.ok()).toBe(true)
+  const aboutHtml = await aboutResponse.text()
+  expect(aboutHtml).toContain('<title>How BenchBazaar works</title>')
+  expect(aboutHtml).toContain('name="description"')
+  expect(aboutHtml).toContain('property="og:title"')
+  expect(aboutHtml).toContain('name="twitter:card"')
+  expect(aboutHtml.match(/rel="canonical"/g)).toHaveLength(1)
+  expect(aboutHtml).toMatch(/href="https?:\/\/[^"]+\/about"/)
+
+  const publicAssets = [
+    ['/favicon.ico', 'image/'],
+    ['/favicon.svg', 'image/svg+xml'],
+    ['/favicon-32x32.png', 'image/png'],
+    ['/apple-touch-icon.png', 'image/png'],
+    ['/manifest.json', 'application/json'],
+    ['/og-default.png', 'image/png'],
+  ] as const
+  for (const [path, contentType] of publicAssets) {
+    const asset = await request.get(path)
+    expect(asset.ok(), path).toBe(true)
+    expect(asset.headers()['content-type'], path).toContain(contentType)
+    expect((await asset.body()).byteLength, path).toBeGreaterThan(0)
+  }
+
+  const robots = await request.get('/robots.txt')
+  expect(robots.ok()).toBe(true)
+  expect(await robots.text()).toContain('Disallow: /')
+
+  const sitemap = await request.get('/sitemap.xml')
+  expect(sitemap.ok()).toBe(true)
+  expect(sitemap.headers()['content-type']).toContain('application/xml')
+  const sitemapXml = await sitemap.text()
+  expect(sitemapXml).toContain('<urlset')
+  expect(sitemapXml).toContain('<loc>')
+  expect(sitemapXml).toContain('/about</loc>')
 
   const response = await page.goto('/about')
   expect(response?.ok()).toBe(true)
@@ -93,12 +131,26 @@ test('visitor can browse and inspect a versioned benchmark and receipt', async (
     page.getByRole('heading', { level: 1, name: /Odd tests/ }),
   ).toBeVisible()
   await page.getByRole('link', { name: /Browse the bazaar/ }).click()
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+    'href',
+    /\/browse$/,
+  )
   await expect(
     page.getByRole('heading', {
       level: 1,
       name: 'Find a useful reality check.',
     }),
   ).toBeVisible()
+
+  await page.goto('/browse?sort=newest')
+  await expect(page.locator('meta[name="robots"]')).toHaveAttribute(
+    'content',
+    'noindex,follow',
+  )
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+    'href',
+    /\/browse$/,
+  )
 
   const benchmarkLink = page.locator('a[href^="/b/"]').first()
   await expect(benchmarkLink).toBeVisible()

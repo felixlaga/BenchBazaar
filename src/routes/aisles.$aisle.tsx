@@ -6,6 +6,7 @@ import { ArrowLeft, ArrowRight, Sparkles } from 'lucide-react'
 import { SectionHeading } from '#/components/ui/section-heading'
 import { MarketCard } from '#/features/catalog/components/market-card'
 import { aisleIds } from '#/features/catalog/domain/catalog'
+import { createSeoMetadata } from '#/lib/seo/metadata'
 
 import { api } from '../../convex/_generated/api'
 
@@ -22,14 +23,15 @@ export const Route = createFileRoute('/aisles/$aisle')({
       }),
     )
   },
-  head: ({ loaderData }) => ({
-    meta: loaderData
-      ? [
-          { title: `${loaderData.aisle.label} · BenchBazaar` },
-          { name: 'description', content: loaderData.aisle.description },
-        ]
-      : [],
-  }),
+  head: ({ loaderData, match }) =>
+    loaderData
+      ? createSeoMetadata({
+          siteOrigin: match.context.siteOrigin,
+          pathname: `/aisles/${loaderData.aisle.id}`,
+          title: `${loaderData.aisle.label} · BenchBazaar`,
+          description: loaderData.aisle.description,
+        })
+      : {},
   component: AislePage,
 })
 

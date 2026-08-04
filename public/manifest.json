@@ -15,6 +15,7 @@
       "purpose": "any"
     }
   ],
+  "id": "/",
   "start_url": "/",
   "display": "standalone",
   "theme_color": "#fff8e7",

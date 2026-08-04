@@ -3,9 +3,17 @@ import { AuthLoading, Authenticated, Unauthenticated } from 'convex/react'
 import { ArrowRight, Check, Github, LockKeyhole, Store } from 'lucide-react'
 
 import { OwnerWorkspace } from '#/features/publishing/components/owner-workspace'
+import { createSeoMetadata } from '#/lib/seo/metadata'
 
 export const Route = createFileRoute('/publish')({
-  head: () => ({ meta: [{ title: 'Publish a benchmark · BenchBazaar' }] }),
+  head: ({ match }) =>
+    createSeoMetadata({
+      siteOrigin: match.context.siteOrigin,
+      pathname: '/publish',
+      title: 'Publish a benchmark · BenchBazaar',
+      description:
+        'Create a versioned LLM benchmark listing with public methods, sample items, scoring rules, limitations, and a sealed-set policy.',
+    }),
   component: PublishPage,
 })
 

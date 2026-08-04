@@ -8,6 +8,7 @@ import { MarketCard } from '#/features/catalog/components/market-card'
 import { aisles } from '#/features/catalog/domain/aisles'
 import { aisleIds } from '#/features/catalog/domain/catalog'
 import type { BrowseSort } from '#/features/catalog/server/catalog.repository'
+import { createSeoMetadata } from '#/lib/seo/metadata'
 
 import { api } from '../../convex/_generated/api'
 
@@ -59,16 +60,17 @@ export const Route = createFileRoute('/browse')({
         toBrowseArgs(deps),
       ),
     ),
-  head: () => ({
-    meta: [
-      { title: 'Browse LLM benchmarks · BenchBazaar' },
-      {
-        name: 'description',
-        content:
-          'Search community-made LLM benchmarks by title, method, aisle, and tag.',
-      },
-    ],
-  }),
+  head: ({ match }) =>
+    createSeoMetadata({
+      siteOrigin: match.context.siteOrigin,
+      pathname: '/browse',
+      title: 'Browse LLM benchmarks · BenchBazaar',
+      description:
+        'Search community-made LLM benchmarks by title, method, aisle, and tag.',
+      indexable: !Object.values(match.search).some(
+        (value) => value !== undefined,
+      ),
+    }),
   component: BrowsePage,
 })
 

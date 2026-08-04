@@ -7,6 +7,7 @@ import { z } from 'zod'
 import { SectionHeading } from '#/components/ui/section-heading'
 import { MarketCard } from '#/features/catalog/components/market-card'
 import { ReceiptPreview } from '#/features/catalog/components/receipt-preview'
+import { createSeoMetadata } from '#/lib/seo/metadata'
 
 import { api } from '../../convex/_generated/api'
 
@@ -34,19 +35,19 @@ export const Route = createFileRoute('/stalls/$handle')({
     if (!result) throw notFound()
     return result
   },
-  head: ({ loaderData }) => ({
-    meta: loaderData
-      ? [
-          { title: `${loaderData.stall.displayName} · BenchBazaar stall` },
-          {
-            name: 'description',
-            content:
-              loaderData.stall.bio ??
-              `Public benchmarks and receipts from @${loaderData.stall.handle}.`,
-          },
-        ]
-      : [],
-  }),
+  head: ({ loaderData, match }) =>
+    loaderData
+      ? createSeoMetadata({
+          siteOrigin: match.context.siteOrigin,
+          pathname: `/stalls/${loaderData.stall.handle}`,
+          title: `${loaderData.stall.displayName} · BenchBazaar stall`,
+          description:
+            loaderData.stall.bio ??
+            `Public benchmarks and receipts from @${loaderData.stall.handle}.`,
+          imageAlt: `${loaderData.stall.displayName} on BenchBazaar`,
+          indexable: !match.search.cursor,
+        })
+      : {},
   component: StallPage,
 })
 

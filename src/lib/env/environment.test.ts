@@ -31,6 +31,34 @@ describe('environment validation', () => {
     ).toThrow('COOKIE_PASSWORD')
   })
 
+  it('requires a clean canonical origin for hosted environments', () => {
+    const baseEnvironment = {
+      BENCHBAZAAR_ENVIRONMENT: 'production' as const,
+      WORKOS_ENVIRONMENT: 'production' as const,
+      CONVEX_ENVIRONMENT: 'production' as const,
+      WORKOS_REDIRECT_URI: 'https://www.benchbazaar.dev/api/auth/callback',
+    }
+
+    expect(
+      readDeploymentEnvironment({
+        ...baseEnvironment,
+        PUBLIC_SITE_URL: 'https://www.benchbazaar.dev/',
+      }),
+    ).toMatchObject({ PUBLIC_SITE_URL: 'https://www.benchbazaar.dev' })
+    expect(() =>
+      readDeploymentEnvironment({
+        ...baseEnvironment,
+        PUBLIC_SITE_URL: 'https://www.benchbazaar.dev/about',
+      }),
+    ).toThrow('canonical HTTPS origin')
+    expect(() =>
+      readDeploymentEnvironment({
+        ...baseEnvironment,
+        PUBLIC_SITE_URL: 'https://www.benchbazaar.dev/?preview=true',
+      }),
+    ).toThrow('canonical HTTPS origin')
+  })
+
   it('fails closed when hosted provider environments are not isolated', () => {
     expect(readDeploymentEnvironment({})).toEqual({
       BENCHBAZAAR_ENVIRONMENT: 'local',

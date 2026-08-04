@@ -11,6 +11,7 @@ import {
   receiptStates,
   verificationStatuses,
 } from '#/features/catalog/domain/catalog'
+import { createSeoMetadata } from '#/lib/seo/metadata'
 
 import { api } from '../../convex/_generated/api'
 
@@ -47,17 +48,19 @@ export const Route = createFileRoute('/models/$modelSlug')({
     if (!result) throw notFound()
     return result
   },
-  head: ({ loaderData }) => ({
-    meta: loaderData
-      ? [
-          { title: `${loaderData.model.displayName} · BenchBazaar model` },
-          {
-            name: 'description',
-            content: `Exact, version-scoped receipts for ${loaderData.model.canonicalId}. No global aggregate score.`,
-          },
-        ]
-      : [],
-  }),
+  head: ({ loaderData, match, params }) =>
+    loaderData
+      ? createSeoMetadata({
+          siteOrigin: match.context.siteOrigin,
+          pathname: `/models/${params.modelSlug}`,
+          title: `${loaderData.model.displayName} · BenchBazaar model`,
+          description: `Exact, version-scoped receipts for ${loaderData.model.canonicalId}. No global aggregate score.`,
+          imageAlt: `${loaderData.model.displayName} result receipts on BenchBazaar`,
+          indexable: !Object.values(match.search).some(
+            (value) => value !== undefined,
+          ),
+        })
+      : {},
   component: ModelPage,
 })
 

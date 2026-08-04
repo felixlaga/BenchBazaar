@@ -13,11 +13,16 @@ import { useCallback, useMemo } from 'react'
 import { AuthenticatedUserSync } from '#/features/auth/components/authenticated-user-sync'
 import { ErrorPage, NotFoundPage } from '#/components/layout/page-states'
 import { readPublicEnvironment } from '#/lib/env/public'
+import { resolveSiteOrigin } from '#/lib/seo/metadata'
 
 import { routeTree } from './routeTree.gen'
 
 export function getRouter() {
   const { VITE_CONVEX_URL } = readPublicEnvironment()
+  const siteOrigin = resolveSiteOrigin(
+    import.meta.env.SSR ? process.env.PUBLIC_SITE_URL : undefined,
+    typeof window === 'undefined' ? undefined : window.location.origin,
+  )
   const convexClient = new ConvexReactClient(VITE_CONVEX_URL)
   const convexQueryClient = new ConvexQueryClient(convexClient)
   const queryClient = new QueryClient({
@@ -35,7 +40,7 @@ export function getRouter() {
 
   const router = createTanStackRouter({
     routeTree,
-    context: { queryClient, convexClient, convexQueryClient },
+    context: { queryClient, convexClient, convexQueryClient, siteOrigin },
     scrollRestoration: true,
     defaultPreload: 'intent',
     defaultPreloadStaleTime: 0,

@@ -7,17 +7,17 @@ import {
   ShieldCheck,
 } from 'lucide-react'
 
+import { createSeoMetadata } from '#/lib/seo/metadata'
+
 export const Route = createFileRoute('/about')({
-  head: () => ({
-    meta: [
-      { title: 'How BenchBazaar works' },
-      {
-        name: 'description',
-        content:
-          'Learn how BenchBazaar separates public benchmark methods from sealed scored sets and provenance-rich result receipts.',
-      },
-    ],
-  }),
+  head: ({ match }) =>
+    createSeoMetadata({
+      siteOrigin: match.context.siteOrigin,
+      pathname: '/about',
+      title: 'How BenchBazaar works',
+      description:
+        'Learn how BenchBazaar separates public benchmark methods from sealed scored sets and provenance-rich result receipts.',
+    }),
   component: AboutPage,
 })
 

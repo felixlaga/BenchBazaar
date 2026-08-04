@@ -10,8 +10,9 @@ import {
   readWorkOSEnvironment,
 } from '#/lib/env/server'
 import { logOperationalEvent } from '#/lib/observability/redaction'
+import { robotsHeaderFor } from '#/lib/seo/robots'
 
-readDeploymentEnvironment()
+const deploymentEnvironment = readDeploymentEnvironment()
 const workosEnvironment = readWorkOSEnvironment()
 
 const csrfMiddleware = createCsrfMiddleware({
@@ -56,9 +57,10 @@ const observabilityMiddleware = createMiddleware({ type: 'request' }).server(
 )
 
 const securityHeadersMiddleware = createMiddleware({ type: 'request' }).server(
-  async ({ next }) => {
+  async ({ next, request }) => {
     const result = await next()
     const headers = result.response.headers
+    const route = new URL(request.url).pathname
     headers.set(
       'Content-Security-Policy',
       [
@@ -81,6 +83,11 @@ const securityHeadersMiddleware = createMiddleware({ type: 'request' }).server(
       'Permissions-Policy',
       'camera=(), microphone=(), geolocation=(), payment=()',
     )
+    const robotsHeader = robotsHeaderFor(
+      deploymentEnvironment.BENCHBAZAAR_ENVIRONMENT,
+      route,
+    )
+    if (robotsHeader) headers.set('X-Robots-Tag', robotsHeader)
     if (process.env.NODE_ENV === 'production') {
       headers.set(
         'Strict-Transport-Security',

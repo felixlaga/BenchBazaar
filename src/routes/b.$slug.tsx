@@ -4,6 +4,7 @@ import { createFileRoute, notFound } from '@tanstack/react-router'
 import { z } from 'zod'
 
 import { BenchmarkPage } from '#/features/catalog/components/benchmark-page'
+import { createSeoMetadata } from '#/lib/seo/metadata'
 
 import { api } from '../../convex/_generated/api'
 
@@ -22,28 +23,17 @@ export const Route = createFileRoute('/b/$slug')({
     if (!result) throw notFound()
     return result
   },
-  head: ({ loaderData }) => ({
-    meta: loaderData
-      ? [
-          { title: `${loaderData.benchmark.title} · BenchBazaar` },
-          { name: 'description', content: loaderData.benchmark.summary },
-          { property: 'og:type', content: 'website' },
-          {
-            property: 'og:image',
-            content: `/api/social/benchmark/${loaderData.benchmark.slug}`,
-          },
-          { name: 'twitter:card', content: 'summary_large_image' },
-        ]
-      : [],
-    links: loaderData
-      ? [
-          {
-            rel: 'canonical',
-            href: `/b/${loaderData.benchmark.slug}`,
-          },
-        ]
-      : [],
-  }),
+  head: ({ loaderData, match }) =>
+    loaderData
+      ? createSeoMetadata({
+          siteOrigin: match.context.siteOrigin,
+          pathname: `/b/${loaderData.benchmark.slug}`,
+          title: `${loaderData.benchmark.title} · BenchBazaar`,
+          description: loaderData.benchmark.summary,
+          imageAlt: `${loaderData.benchmark.title} on BenchBazaar`,
+          indexable: !match.search.track,
+        })
+      : {},
   component: CurrentBenchmarkRoute,
 })
 

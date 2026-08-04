@@ -8,6 +8,7 @@ import { StatusBanner } from '#/components/ui/status-banner'
 import { ReceiptPaper } from '#/features/catalog/components/receipt-paper'
 import { ReportForm } from '#/features/moderation/components/report-form'
 import { ReceiptActions } from '#/features/receipts/components/receipt-actions'
+import { createSeoMetadata } from '#/lib/seo/metadata'
 
 import { api } from '../../convex/_generated/api'
 
@@ -21,22 +22,16 @@ export const Route = createFileRoute('/receipts/$receiptId')({
     if (!receipt) throw notFound()
     return receipt
   },
-  head: ({ loaderData }) => ({
-    meta: loaderData
-      ? [
-          { title: `${loaderData.id} · BenchBazaar receipt` },
-          {
-            name: 'description',
-            content: `Result receipt for ${loaderData.model.displayName} on ${loaderData.benchmark.title} version ${loaderData.benchmark.version}.`,
-          },
-          {
-            property: 'og:image',
-            content: `/api/social/receipt/${loaderData.id}`,
-          },
-          { name: 'twitter:card', content: 'summary_large_image' },
-        ]
-      : [],
-  }),
+  head: ({ loaderData, match }) =>
+    loaderData
+      ? createSeoMetadata({
+          siteOrigin: match.context.siteOrigin,
+          pathname: `/receipts/${loaderData.id}`,
+          title: `${loaderData.id} · BenchBazaar receipt`,
+          description: `Result receipt for ${loaderData.model.displayName} on ${loaderData.benchmark.title} version ${loaderData.benchmark.version}.`,
+          imageAlt: `Result receipt for ${loaderData.model.displayName} on ${loaderData.benchmark.title}`,
+        })
+      : {},
   component: ReceiptPage,
 })
 

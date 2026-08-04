@@ -15,6 +15,7 @@ import { StatusBanner } from '#/components/ui/status-banner'
 import { AisleSign } from '#/features/catalog/components/aisle-sign'
 import { MarketCard } from '#/features/catalog/components/market-card'
 import { ReceiptPreview } from '#/features/catalog/components/receipt-preview'
+import { absoluteSiteUrl, createSeoMetadata } from '#/lib/seo/metadata'
 
 import { api } from '../../convex/_generated/api'
 
@@ -23,16 +24,32 @@ export const Route = createFileRoute('/')({
     context.queryClient.ensureQueryData(
       context.convexQueryClient.queryOptions(api.catalog.home, {}),
     ),
-  head: () => ({
-    meta: [
-      { title: 'BenchBazaar · Odd tests. Useful signals.' },
-      {
-        name: 'description',
-        content:
-          'Discover unusual, useful LLM benchmarks with public methods, sealed scored sets, and receipts for every result.',
+  head: ({ match }) => {
+    const title = 'BenchBazaar · Odd tests. Useful signals.'
+    const description =
+      'Discover unusual, useful LLM benchmarks with public methods, sealed scored sets, and receipts for every result.'
+    const siteUrl = absoluteSiteUrl(match.context.siteOrigin, '/')
+
+    return createSeoMetadata({
+      siteOrigin: match.context.siteOrigin,
+      pathname: '/',
+      title,
+      description,
+      imageAlt: 'BenchBazaar, the open marketplace for useful LLM benchmarks',
+      jsonLd: {
+        '@context': 'https://schema.org',
+        '@type': 'WebSite',
+        name: 'BenchBazaar',
+        url: siteUrl,
+        description,
+        potentialAction: {
+          '@type': 'SearchAction',
+          target: `${absoluteSiteUrl(match.context.siteOrigin, '/browse')}?q={search_term_string}`,
+          'query-input': 'required name=search_term_string',
+        },
       },
-    ],
-  }),
+    })
+  },
   component: HomePage,
 })
 

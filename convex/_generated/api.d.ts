@@ -26,6 +26,7 @@ import type * as receipts from "../receipts.js";
 import type * as runRequests from "../runRequests.js";
 import type * as runners from "../runners.js";
 import type * as seed from "../seed.js";
+import type * as seo from "../seo.js";
 import type * as uploads from "../uploads.js";
 import type * as users from "../users.js";
 
@@ -54,6 +55,7 @@ declare const fullApi: ApiFromModules<{
   runRequests: typeof runRequests;
   runners: typeof runners;
   seed: typeof seed;
+  seo: typeof seo;
   uploads: typeof uploads;
   users: typeof users;
 }>;

@@ -9,6 +9,8 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
 import { Route as RequestsRouteImport } from './routes/requests'
 import { Route as PublishRouteImport } from './routes/publish'
 import { Route as MysteryRouteImport } from './routes/mystery'
@@ -42,6 +44,16 @@ import { Route as BSlugVVersionRouteImport } from './routes/b.$slug.v.$version'
 import { Route as ApiSocialReceiptReceiptIdRouteImport } from './routes/api.social.receipt.$receiptId'
 import { Route as ApiSocialBenchmarkSlugRouteImport } from './routes/api.social.benchmark.$slug'
 
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RobotsDottxtRoute = RobotsDottxtRouteImport.update({
+  id: '/robots.txt',
+  path: '/robots.txt',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RequestsRoute = RequestsRouteImport.update({
   id: '/requests',
   path: '/requests',
@@ -214,6 +226,8 @@ export interface FileRoutesByFullPath {
   '/mystery': typeof MysteryRoute
   '/publish': typeof PublishRoute
   '/requests': typeof RequestsRouteWithChildren
+  '/robots.txt': typeof RobotsDottxtRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/aisles/$aisle': typeof AislesAisleRoute
   '/api/health': typeof ApiHealthRoute
   '/b/$slug': typeof BSlugRouteWithChildren
@@ -248,6 +262,8 @@ export interface FileRoutesByTo {
   '/mystery': typeof MysteryRoute
   '/publish': typeof PublishRoute
   '/requests': typeof RequestsRouteWithChildren
+  '/robots.txt': typeof RobotsDottxtRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/aisles/$aisle': typeof AislesAisleRoute
   '/api/health': typeof ApiHealthRoute
   '/b/$slug': typeof BSlugRouteWithChildren
@@ -283,6 +299,8 @@ export interface FileRoutesById {
   '/mystery': typeof MysteryRoute
   '/publish': typeof PublishRoute
   '/requests': typeof RequestsRouteWithChildren
+  '/robots.txt': typeof RobotsDottxtRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/aisles/$aisle': typeof AislesAisleRoute
   '/api/health': typeof ApiHealthRoute
   '/b/$slug': typeof BSlugRouteWithChildren
@@ -319,6 +337,8 @@ export interface FileRouteTypes {
     | '/mystery'
     | '/publish'
     | '/requests'
+    | '/robots.txt'
+    | '/sitemap.xml'
     | '/aisles/$aisle'
     | '/api/health'
     | '/b/$slug'
@@ -353,6 +373,8 @@ export interface FileRouteTypes {
     | '/mystery'
     | '/publish'
     | '/requests'
+    | '/robots.txt'
+    | '/sitemap.xml'
     | '/aisles/$aisle'
     | '/api/health'
     | '/b/$slug'
@@ -387,6 +409,8 @@ export interface FileRouteTypes {
     | '/mystery'
     | '/publish'
     | '/requests'
+    | '/robots.txt'
+    | '/sitemap.xml'
     | '/aisles/$aisle'
     | '/api/health'
     | '/b/$slug'
@@ -422,6 +446,8 @@ export interface RootRouteChildren {
   MysteryRoute: typeof MysteryRoute
   PublishRoute: typeof PublishRoute
   RequestsRoute: typeof RequestsRouteWithChildren
+  RobotsDottxtRoute: typeof RobotsDottxtRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   AislesAisleRoute: typeof AislesAisleRoute
   ApiHealthRoute: typeof ApiHealthRoute
   BSlugRoute: typeof BSlugRouteWithChildren
@@ -445,6 +471,20 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/robots.txt': {
+      id: '/robots.txt'
+      path: '/robots.txt'
+      fullPath: '/robots.txt'
+      preLoaderRoute: typeof RobotsDottxtRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/requests': {
       id: '/requests'
       path: '/requests'
@@ -708,6 +748,8 @@ const rootRouteChildren: RootRouteChildren = {
   MysteryRoute: MysteryRoute,
   PublishRoute: PublishRoute,
   RequestsRoute: RequestsRouteWithChildren,
+  RobotsDottxtRoute: RobotsDottxtRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   AislesAisleRoute: AislesAisleRoute,
   ApiHealthRoute: ApiHealthRoute,
   BSlugRoute: BSlugRouteWithChildren,
