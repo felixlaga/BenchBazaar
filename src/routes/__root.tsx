@@ -9,6 +9,7 @@ import {
 } from '@tanstack/react-router'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
+import { Analytics } from '@vercel/analytics/react'
 import { getAuth } from '@workos/authkit-tanstack-react-start'
 
 import { ErrorPage, NotFoundPage } from '#/components/layout/page-states'
@@ -93,6 +94,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         {children}
+        <Analytics />
         {import.meta.env.DEV && (
           <TanStackDevtools
             config={{ position: 'bottom-right' }}
