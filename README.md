@@ -2,6 +2,8 @@
 
 > **Odd tests. Useful signals.**
 
+**Live site: [www.benchbazaar.dev](https://www.benchbazaar.dev/)**
+
 BenchBazaar is an open registry for community-made LLM benchmarks. Authors publish a
 title, a short card description, a full explanation, three public examples, an optional
 GitHub repository, and versioned result receipts while keeping official scored items
